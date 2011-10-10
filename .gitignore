@@ -12,3 +12,8 @@ config.sub
 configure
 depcomp
 gicr-midgard2.pc
+install-sh
+libtool
+ltmain.sh
+missing
+stamp-h1
