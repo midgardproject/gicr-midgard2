@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: GICR-Midgard2
+Description: GObject Introspection Content Repository, Midgard2 implementation 
+Requires: glib-2.0 gobject-2.0, gicr
+Version: @VERSION@
+Libs: -L${libdir} -lgicr
+Cflags: -I${includedir}/gicr @GICR_MIDGARD2_CFLAGS@
