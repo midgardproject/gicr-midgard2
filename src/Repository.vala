@@ -95,7 +95,7 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public Session login (Credentials credentials, string? workspace_name) throws RepositoryException {
+		public GICR.Session login (Credentials credentials, string? workspace_name) throws RepositoryException {
 			/* TODO, initialize user */
 			Midgard.User user = null;
 			Midgard.Object rootObject = null; 

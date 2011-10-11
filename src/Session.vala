@@ -35,7 +35,7 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc} 
 		 */
-		public Repository get_repository () {
+		public GICR.Repository get_repository () {
 			return this.repository;
 		}
 
@@ -78,7 +78,7 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public Session impersonate (Credentials credentials) throws LoginException, RepositoryException {
+		public GICR.Session impersonate (Credentials credentials) throws LoginException, RepositoryException {
 			throw new LoginException.INTERNAL ("Not supported");
 		}
 

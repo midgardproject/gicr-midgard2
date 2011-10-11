@@ -15,7 +15,6 @@
  */
 
 using GICR;
-using Midgard;
 
 namespace Midgard2CR {
 
@@ -27,7 +26,7 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public Repository get_repository (HashTable? parameters) 
+		public GICR.Repository get_repository (HashTable? parameters) 
 		{
 			return new Midgard2CR.Repository (parameters);
 		}		
