@@ -28,6 +28,7 @@ gicr_midgard2_gir_file = GICR-MIDGARD2-1.0.gir
 libgicrmidgard2_la_SOURCES = \
 		     Repository.vala \
 		     RepositoryFactory.vala \
+		     Session.vala \
 		     $(NULL)
 			  
 libgicrmidgard2_la_LDFLAGS = -module -export-dynamic @GICR_MIDGARD2_ABI_MAJOR@:0:0
