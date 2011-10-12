@@ -47,7 +47,7 @@ namespace Midgard2CR {
 			Midgard.Storage.create_base_storage (cnc);
 			
 			/* Create or update storage for every Midgard.DBObject derived type */
-			Type children[] = Type.from_name ("MidgardDBObject").children();
+			Type[] children = Type.from_name ("MidgardDBObject").children();
 			foreach (var t in children) {
 				/* Ignore abstract types and interfaces */
 				if (t.is_abstract()
