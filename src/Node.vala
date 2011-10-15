@@ -16,7 +16,26 @@
 
 namespace Midgard2CR {
 
-	public class Node : Object, GICR.Item {
+	public class Node : Item {
+
+		private Midgard.Object midgardNode = null; 
+
+		/**
+		 * Constructor
+		 *
+		 * Newly instatiated node is a root node if:
+		 * * parent is null
+		 * * midgardNode is stored in table (determined by valid guid property)
+		 * * midgardNode's up property is 0
+		 *
+		 * @param session a {@link GICR.Session} to which node is associated
+		 * @param midgardNode Midgard.Object of 'midgard_node' type which represents SQL record of the node
+		 * @param parent a Node which is a parent for given node.
+		 * A node is likely a root node if null given as parent
+		 */
+		public Node (GICR.Session session, Midgard.Object? midgardNode, GICR.Node? parent) {
+			this.session = session;
+		}
 
 		/**
 		 * {@inheritDoc}
