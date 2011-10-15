@@ -18,7 +18,7 @@ AM_PROG_LIBTOOL
 AM_PROG_VALAC([0.7.0])
 AC_PROG_INSTALL
 
-PKG_CHECK_MODULES(GICR_MIDGARD2, glib-2.0 gobject-2.0 midgard2 gicr)
+PKG_CHECK_MODULES(GICR_MIDGARD2, glib-2.0 gobject-2.0 midgard2 gicr libxml-2.0 gee-1.0)
 
 LIBS="$INTLLIBS $LIBS"
 
