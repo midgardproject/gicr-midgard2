@@ -16,9 +16,12 @@
 
 namespace Midgard2CR {
 
-	public class Node : Item {
+	public class Node : GLib.Object, GICR.Item {
 
 		private Midgard.Object midgardNode = null; 
+		private GICR.Session session = null;
+		private GICR.Node parent = null;
+		private bool isRoot = false;
 
 		/**
 		 * Constructor
@@ -35,6 +38,15 @@ namespace Midgard2CR {
 		 */
 		public Node (GICR.Session session, Midgard.Object? midgardNode, GICR.Node? parent) {
 			this.session = session;
+			this.midgardNode = midgardNode;
+			var up_prop_value = 0;
+			midgardNode.get ("up", up_prop_value);
+			if (parent == null) {
+				if (midgardNode != null 
+					&& (Midgard.is_guid (midgardNode.guid) && up_prop_value != 0)) {
+					this.isRoot = true;
+				}
+			}
 		}
 
 		/**
