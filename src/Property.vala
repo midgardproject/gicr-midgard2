@@ -19,7 +19,7 @@ namespace Midgard2CR {
 	/**
 	 * {@inheritDoc}
 	 */	
-	public class Property : Object, GICR.Item {
+	public class Property : GLib.Object, GICR.Item {
 
 		/**
 		 * {@inheritDoc}
@@ -315,6 +315,10 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public const string JCR_STATEMENT = "{http://www.jcp.org/jcr/1.0}statement";
+
+		/* Private members */
+		private GICR.Session session = null;
+		private GICR.Node parent = null;
 
 		/**
 		 * {@inheritDoc}
