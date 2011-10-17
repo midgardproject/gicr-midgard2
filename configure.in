@@ -20,6 +20,14 @@ AC_PROG_INSTALL
 
 PKG_CHECK_MODULES(GICR_MIDGARD2, glib-2.0 gobject-2.0 midgard2 gicr libxml-2.0 gee-1.0)
 
+PKG_CHECK_MODULES(GICR, gicr)
+AC_SUBST(GICR_CFLAGS)
+AC_SUBST(GICR_LIBS)
+
+PKG_CHECK_MODULES(MIDGARD, midgard2)
+AC_SUBST(MIDGARD_CFLAGS)
+AC_SUBST(MIDGARD_LIBS)
+
 LIBS="$INTLLIBS $LIBS"
 
 PATH="${PATH}:${prefix}/bin"
@@ -53,5 +61,6 @@ AC_SUBST(GICR_MIDGARD2_CFLAGS)
 
 AC_CONFIG_FILES([Makefile 
 		 src/Makefile 
+		 examples/Makefile
 		 gicr-midgard2.pc])
 AC_OUTPUT
