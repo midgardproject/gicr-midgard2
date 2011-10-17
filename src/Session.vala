@@ -11,7 +11,7 @@ namespace Midgard2CR {
 		private Repository repository = null;
 		private string userID = null;
 		private Workspace workspace = null;
-		private GICR.Node rootNode = null;
+		private Node rootNode = null;
 		private Midgard.Connection connection = null;
 		private Midgard.User user = null;
 		private Midgard.Object rootObject = null;
@@ -72,7 +72,11 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public GICR.Node get_root_node () {
-			return this.rootNode;
+			if (this.rootNode == null) {
+				this.rootNode = new Node (this, this.rootObject, null);
+			}
+			
+			return (GICR.Node) this.rootNode;
 		}
 
 		/**
@@ -106,7 +110,7 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public Property get_node_property (string absPath) throws RepositoryException, PathNotFoundException {
+		public GICR.Property get_node_property (string absPath) throws RepositoryException, PathNotFoundException {
 			throw new RepositoryException.INTERNAL ("Not supported");
 		}
 
