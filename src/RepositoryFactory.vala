@@ -14,8 +14,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-using GICR;
-
 namespace Midgard2CR {
 
 	/**
@@ -26,8 +24,7 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public GICR.Repository get_repository (HashTable? parameters) 
-		{
+		public static Repository get_repository (HashTable? parameters) {
 			return new Midgard2CR.Repository (parameters);
 		}		
 	}
