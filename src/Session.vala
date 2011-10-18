@@ -76,7 +76,7 @@ namespace Midgard2CR {
 				this.rootNode = new Node (this, this.rootObject, null);
 			}
 			
-			return (GICR.Node) this.rootNode;
+			return (this.rootNode as GICR.Node);
 		}
 
 		/**
