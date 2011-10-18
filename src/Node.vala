@@ -29,7 +29,7 @@ namespace Midgard2CR {
 		 * Newly instatiated node is a root node if:
 		 * * parent is null
 		 * * midgardNode is stored in table (determined by valid guid property)
-		 * * midgardNode's up property is 0
+		 * * midgardNode's parent property is 0
 		 *
 		 * @param session a {@link GICR.Session} to which node is associated
 		 * @param midgardNode Midgard.Object of 'midgard_node' type which represents SQL record of the node
@@ -40,7 +40,7 @@ namespace Midgard2CR {
 			this.session = session;
 			this.midgardNode = midgardNode;
 			var up_prop_value = 0;
-			midgardNode.get ("up", up_prop_value);
+			midgardNode.get ("parent", out up_prop_value);
 			if (parent == null) {
 				if (midgardNode != null 
 					&& (Midgard.is_guid (midgardNode.guid) && up_prop_value != 0)) {
