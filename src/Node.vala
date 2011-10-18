@@ -44,7 +44,7 @@ namespace Midgard2CR {
 			midgardNode.get ("parent", out up_prop_value);
 			if (parent == null) {
 				if (midgardNode != null 
-					&& (Midgard.is_guid (midgardNode.guid) && up_prop_value != 0)) {
+					&& (Midgard.is_guid (midgardNode.guid) && up_prop_value == 0)) {
 					this.isRoot = true;
 				}
 			}
