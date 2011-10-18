@@ -20,8 +20,9 @@ namespace Midgard2CR {
 
 		private Midgard.Object midgardNode = null; 
 		private GICR.Session session = null;
-		private GICR.Node parent = null;
+		private Node parent = null;
 		private bool isRoot = false;
+		private string name = null;
 
 		/**
 		 * Constructor
@@ -36,10 +37,10 @@ namespace Midgard2CR {
 		 * @param parent a Node which is a parent for given node.
 		 * A node is likely a root node if null given as parent
 		 */
-		public Node (GICR.Session session, Midgard.Object? midgardNode, GICR.Node? parent) {
+		public Node (GICR.Session session, Midgard.Object? midgardNode, Node? parent) {
 			this.session = session;
 			this.midgardNode = midgardNode;
-			var up_prop_value = 0;
+			var up_prop_value = 0;	
 			midgardNode.get ("parent", out up_prop_value);
 			if (parent == null) {
 				if (midgardNode != null 
@@ -47,6 +48,7 @@ namespace Midgard2CR {
 					this.isRoot = true;
 				}
 			}
+			this.parent = parent;
 		}
 
 		/**
@@ -297,14 +299,28 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */		
 		public string get_path () throws GICR.RepositoryException {
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+			/* Root node so return "empty" path */
+			if (this.isRoot == true)
+				return "/";
+
+			/* Parent node is root, append to path instance name only */
+			if (this.parent == null || this.parent.isRoot == true)
+				return "/" + this.get_name ();
+
+			/* Chain up and build full path till root node is found */
+			return this.parent.get_path () + "/" + this.get_name ();
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public string get_name () throws GICR.RepositoryException {
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+			if (this.name == null) {
+				this.name = "";
+				if (this.isRoot == false)
+					this.midgardNode.get ("name", out this.name);	
+			}
+			return this.name;
 		}
 
 		/**
