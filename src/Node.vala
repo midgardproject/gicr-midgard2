@@ -16,7 +16,7 @@
 
 namespace Midgard2CR {
 
-	public class Node : GLib.Object, GICR.Item {
+	public class Node : GLib.Object, GICR.Item, GICR.Node {
 
 		private Midgard.Object midgardNode = null; 
 		private GICR.Session session = null;
@@ -52,7 +52,7 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public Node add_node (string relPath, string? primaryNodeTypeName) throws GICR.ItemExistsException, GICR.PathNotFoundException, GICR.ConstraintViolationException, GICR.VersionException, GICR.LockException, GICR.InvalidArgumentException, GICR.RepositoryException { 
+		public GICR.Node add_node (string relPath, string? primaryNodeTypeName) throws GICR.ItemExistsException, GICR.PathNotFoundException, GICR.ConstraintViolationException, GICR.VersionException, GICR.LockException, GICR.InvalidArgumentException, GICR.RepositoryException { 
 			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
 		}
 
@@ -73,14 +73,14 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public Node get_node (string relPath) throws GICR.PathNotFoundException, GICR.InvalidArgumentException, GICR.RepositoryException { 
+		public GICR.Node get_node (string relPath) throws GICR.PathNotFoundException, GICR.InvalidArgumentException, GICR.RepositoryException { 
 			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
-		public Node[] get_nodes (string[]? filter) throws GICR.RepositoryException{ 
+		public Node[] get_nodes (string[]? filter) throws GICR.RepositoryException { 
 			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
 		}
 
