@@ -18,3 +18,15 @@ ltmain.sh
 missing
 stamp-h1
 src/.deps
+src/*.c
+src/*.o
+src/.libs/
+src/*~
+src/*.gir
+src/*.typelib
+src/*.vapi
+src/*.lo
+src/gicr-midgard2.h
+src/*.la
+src/*.stamp
+
