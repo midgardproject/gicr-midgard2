@@ -20,6 +20,9 @@ namespace Midgard2CR {
 			if (this.connection != null)
 				return this.connection;
 
+			/* Initialie Midgard types */
+			Midgard.init ();
+
 			/* Check if given parameters has configuration buffer.
 			 * It doesn't make sens to read and set every single config property.
 			 * Repository initialization part should be responsible for config.
@@ -47,7 +50,7 @@ namespace Midgard2CR {
 			Midgard.Storage.create_base_storage (cnc);
 			
 			/* Create or update storage for every Midgard.DBObject derived type */
-			Type[] children = Type.from_name ("MidgardDBObject").children();
+			Type[] children = Type.from_name ("MidgardObject").children();
 			foreach (var t in children) {
 				/* Ignore abstract types and interfaces */
 				if (t.is_abstract()
@@ -67,9 +70,9 @@ namespace Midgard2CR {
 				return;
 
 			/* If it's not there, create it */
-			var node = Midgard.Object.factory (cnc, "midgard_node", 0);
+			var node = Midgard.Object.factory (cnc, "midgard_node", "");
 			node.set_property ("parent", 0);
-			node.set_property ("name", "root");
+			node.set_property ("name", "Midgard2CR Root Node");
 			node.create ();
 		}
 
