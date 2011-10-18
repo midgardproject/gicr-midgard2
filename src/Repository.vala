@@ -11,12 +11,12 @@ namespace Midgard2CR {
 
 		private Midgard.Connection connection = null;
 
-		public Repository (HashTable? parameters) throws Error {
+		public Repository (Gee.HashMap? parameters) throws Error {
 			GLib.Object ();
 			this.connection = this.midgard2_connect (parameters);
 		}
 
-		private Midgard.Connection midgard2_connect (HashTable <string, string>parameters) throws Error {
+		private Midgard.Connection midgard2_connect (Gee.HashMap <string, string>parameters) throws Error {
 			if (this.connection != null)
 				return this.connection;
 

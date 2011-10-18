@@ -24,7 +24,7 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public static Repository get_repository (HashTable? parameters) {
+		public static Repository get_repository (Gee.HashMap? parameters) {
 			return new Midgard2CR.Repository (parameters);
 		}		
 	}
