@@ -1,5 +1,7 @@
 
-SUBDIRS = src 
+SUBDIRS = \
+	  src \
+	  examples
 
 doc:
 	doxygen
