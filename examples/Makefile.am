@@ -11,20 +11,30 @@ AM_CFLAGS =                             \
 	$(NULL)
 
 
-bin_PROGRAMS = session-login
+bin_PROGRAMS = session-login 
+bin_PROGRAMS += session-import
 
-BUILT_SOURCES = session_login.vala.stamp
+BUILT_SOURCES = session_login.vala.stamp 
+BUILT_SOURCES += session_import.vala.stamp
 
 session_login_VALASOURCES = \
-	session_login.vala      \
-    $(NULL)
+			    session_login.vala \
+			    $(NULL)
+
+session_import_VALASOURCES = \
+		     	     session_import.vala \
+			     $(NULL)
 
 session_login_SOURCES = \
-	$(session_login_VALASOURCES:.vala=.c) \
-	$(NULL)
+			$(session_login_VALASOURCES:.vala=.c) \
+			$(NULL)
 	
-session_login_LDADD =			\
-	../src/libgicrmidgard2.la	 \
+session_import_SOURCES = \
+			$(session_import_VALASOURCES:.vala=.c) \
+			$(NULL)
+
+common_LDADD =			\
+	../src/libgicrmidgard2.la	\
 	$(GLIB_LIBS)                	\
 	$(LIBVALA_LIBS)             	\
 	$(MIDGARD_LIBS) 	    	\
@@ -32,14 +42,29 @@ session_login_LDADD =			\
 	$(LIBGEE_LIBS)			\
 	$(NULL)
 
-session_login.vala.stamp: $(session_login_VALASOURCES)
-	$(VALAC) -C --pkg Midgard2CR-1.0 --pkg GICR-1.0 --pkg gee-1.0 --pkg libxml-2.0 --pkg Midgard --pkg gio-2.0 --vapidir $(top_srcdir)/src/ $^
-	touch $@
+session_login_LDADD = $(common_LDADD) 
+session_import_LDADD = $(common_LDADD) 
 
-EXTRA_DIST = $(session_login_VALASOURCES)  session_login.vala.stamp 
+common_VALA_COMMAND = $(VALAC) -C --pkg Midgard2CR-1.0 --pkg GICR-1.0 --pkg gee-1.0 --pkg libxml-2.0 --pkg Midgard --pkg gio-2.0 --vapidir $(top_srcdir)/src/ $^ 
+
+session_login.vala.stamp: $(session_login_VALASOURCES)
+	$(common_VALA_COMMAND)
+	touch @
+
+session_import.vala.stamp: $(session_import_VALASOURCES)
+	$(common_VALA_COMMAND)
+	touch @
+
+EXTRA_DIST = \
+	     $(session_login_VALASOURCES)  session_login.vala.stamp \
+	     $(session_import_VALASOURCES)  session_import.vala.stamp \
+	     $(NULL)
+
 
 MAINTAINERCLEANFILES =              \
 	$(session_login_VALASOURCES:.vala=.c) \
 	$(session_login_VALASOURCES:.vala=.h) \
+	$(session_import_VALASOURCES:.vala=.c) \
+	$(session_import_VALASOURCES:.vala=.h) \
 	$(NULL)
 
