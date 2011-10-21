@@ -18,7 +18,7 @@ namespace Midgard2CR {
 
 	public class XMLImporterFactory : Object {
 
-		public static XMLImporter create_importer_from_data (GICR.Session session, string xmlData) throws GICR.RepositoryException {
+		public static XMLImporter create_importer_from_data (GICR.Session session, string parentNodePath, int uuidB, string xmlData) throws GICR.RepositoryException {
 
 			/* Create document from given file path */
 		        Xml.Doc* doc = Xml.Parser.parse_memory (xmlData, xmlData.length);
@@ -26,30 +26,27 @@ namespace Midgard2CR {
 				throw new GICR.RepositoryException.INTERNAL ("Can not create xml document from given xml data");
 			}
 
-			return create_importer (session,doc);
+			return create_importer (session,parentNodePath, uuidB, doc);
 		}
 
-		public static XMLImporter create_importer_from_file (GICR.Session session, string filePath) throws GICR.RepositoryException {
+		public static XMLImporter create_importer_from_file (GICR.Session session, string parentNodePath, int uuidB, string filePath) throws GICR.RepositoryException {
 
 			/* Create document from given file path */
-		        Xml.Doc* doc = Xml.Parser.parse_file (filePath);
-		        if (doc == null) {
-				throw new GICR.RepositoryException.INTERNAL ("Can not create xml document from given '%s' filepath", filePath);
-			}
-
-			return create_importer (session, doc);
+			string xmlData;
+			FileUtils.get_contents (filePath, out xmlData);
+			return create_importer_from_data (session, parentNodePath, uuidB, xmlData);
 	        }
 		
-		private static XMLImporter create_importer (GICR.Session session, Xml.Doc* doc) throws GICR.RepositoryException {
+		private static XMLImporter create_importer (GICR.Session session, string path, int uuidB, Xml.Doc* doc) throws GICR.RepositoryException {
 			Xml.Node* root = doc->get_root_element ();
 			if (root == null) 
 				throw new GICR.RepositoryException.INTERNAL ("Invalid xml data. Can not determine root node");
 
 			/* Assume that root with name node means system view, document one otherwise */
 			if (root->name == "node")
-				return new XMLSystemViewImporter (session, doc);
+				return new XMLSystemViewImporter (session, path, uuidB, doc);
 			
-			return new XMLDocumentViewImporter (session, doc);
+			return new XMLDocumentViewImporter (session, path, uuidB, doc);
 		}			
 	}
 }
