@@ -22,9 +22,15 @@ namespace Midgard2CR {
 		/* Keep references to Session and Xml document */
 		protected Xml.Doc* xmlDocument = null;
 		protected GICR.Session session = null;
+		protected string parentNodePath = null;
+		protected int uuidBehavior = 0;
+		protected Gee.HashMap namespaces = null;
 
-		public XMLImporter (GICR.Session session, Xml.Doc* Doc) {
+		public XMLImporter (GICR.Session session, string parentNodePath, int uuidBehavior, Xml.Doc* Doc) {
 			this.xmlDocument = Doc;
+			this.session = session;
+			this.parentNodePath = parentNodePath;
+			this.uuidBehavior = uuidBehavior;
 		}
 
 		~XmlImporter () {
@@ -37,22 +43,29 @@ namespace Midgard2CR {
 		 * @return new Gee.HashMap with prefixes and namespaces */
 		public abstract Gee.HashMap get_namespaces ();
 
+		/**
+		 * Executes import.
+		 * 
+		 * From associated xml document create Node objects and adds them to the repository.
+		 */
+		public abstract void execute ();
+
 		/* 
 		 * Create {@link Node} from Xml.Node.
 		 *
 		 * Created node should have all properties set
 		 *
-		 * @param xmlNode a {@link Xml.Node} to create GICR.Node node from 
-		 * @return GICR.Node 
+		 * @param xmlNode a {@link Xml.Node} to create Midgard2CR.Node node from 
+		 * @return Midgard2CR.Node 
 		 */
-		public abstract GICR.Node create_cr_node (Xml.Node xmlNode);
+		public abstract Midgard2CR.Node create_cr_node (Xml.Node xmlNode);
 
 		/**
 		 * Create {@link Node} nodes which are child of the node represented by given Xml.Node.
 		 * 
-		 * @param xmlNode a {link @Xml.Node} to create child GICR.Node node from
+		 * @param xmlNode a {link @Xml.Node} to create child Midgard2CR.Node node from
 		 * @return array of {@link Node) child nodes
 		 */
-		public abstract GICR.Node[] create_cr_nodes (Xml.Node xmlNode);
+		public abstract Midgard2CR.Node[] create_cr_nodes (Xml.Node xmlNode);
 	}
 }
