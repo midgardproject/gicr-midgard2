@@ -37,6 +37,7 @@ libgicrmidgard2_la_SOURCES = \
 		     XMLDocumentViewImporter.vala \
 		     Node.vala \
 		     Property.vala \
+		     impl/Path.vala \
 		     $(NULL)
 			  
 libgicrmidgard2_la_LDFLAGS = -module -export-dynamic @GICR_MIDGARD2_ABI_MAJOR@:0:0
