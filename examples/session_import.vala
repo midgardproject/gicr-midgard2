@@ -19,7 +19,7 @@ void main () {
 
 	/* Import content from available xml file */
 	/* FIXME, Set correct ImportUUIDBehavior value */
-	session.import_xml ("/", "midgard_import.xml", 0);
+	session.import_xml ("/", Environment.get_current_dir () + "/import_example.xml", 0);
 
 	GICR.Node exampleNode = session.get_node ("/tests_general_base/idExample");
 	stdout.printf ("Found node at '%s' path \n", exampleNode.get_path ());
