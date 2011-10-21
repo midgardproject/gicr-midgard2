@@ -108,7 +108,11 @@ namespace Midgard2CR {
 			var rNode = this.get_root_node ();
 			if (absPath == "/")
 				return rNode;
-			return rNode.get_node (Path.is_absolute (absPath) ? absPath.substring (1, -1) : absPath);
+			try {
+				return rNode.get_node (Path.is_absolute (absPath) ? absPath.substring (1, -1) : absPath);
+			} catch (GICR.InvalidArgumentException e) {
+				throw new GICR.RepositoryException.INTERNAL (e.message);
+			}
 		}
 
 		/**
