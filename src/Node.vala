@@ -19,10 +19,13 @@ namespace Midgard2CR {
 	public class Node : GLib.Object, GICR.Item, GICR.Node {
 
 		private Midgard.Object midgardNode = null; 
-		private GICR.Session session = null;
+		private Midgard2CR.Session session = null;
 		private Node parent = null;
 		private bool isRoot = false;
 		private string name = null;
+		private Gee.HashMap <string, Object>children = null;
+		private bool isNew = true;
+		private bool isModified = false;
 
 		/**
 		 * Constructor
@@ -37,7 +40,7 @@ namespace Midgard2CR {
 		 * @param parent a Node which is a parent for given node.
 		 * A node is likely a root node if null given as parent
 		 */
-		public Node (GICR.Session session, Midgard.Object? midgardNode, Node? parent) {
+		public Node (Midgard2CR.Session session, Midgard.Object? midgardNode, Node? parent) {
 			this.session = session;
 			this.midgardNode = midgardNode;
 			var up_prop_value = 0;	
@@ -51,11 +54,39 @@ namespace Midgard2CR {
 			this.parent = parent;
 		}
 
+		private Node append_node (string name, string? primaryNodeTypeName) throws GICR.ItemExistsException, GICR.ConstraintViolationException, GICR.RepositoryException {
+			if (this.children != null
+				&& this.children.has_key (name))
+				throw new GICR.ItemExistsException.INTERNAL ("Node at path '%s/%s' exists ", this.get_path (), name);
+
+			var midgardNode = Midgard.Object.factory (this.session.connection, "midgard_node", "");	
+		}
+
 		/**
 		 * {@inheritDoc}
 		 */
-		public GICR.Node add_node (string relPath, string? primaryNodeTypeName) throws GICR.ItemExistsException, GICR.PathNotFoundException, GICR.ConstraintViolationException, GICR.VersionException, GICR.LockException, GICR.InvalidArgumentException, GICR.RepositoryException { 
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+		public GICR.Node add_node (string relPath, string? primaryNodeTypeName) throws GICR.ItemExistsException, GICR.PathNotFoundException, GICR.ConstraintViolationException, GICR.VersionException, GICR.LockException, GICR.InvalidArgumentException, GICR.RepositoryException {
+			if (Path.is_absolute (relPath) == true) 
+				throw new GICR.InvalidArgumentException.INTERNAL ("Expected relative path. Absolute one given");
+			
+			/* RepositoryException - If the last element of relPath has an index or if another error occurs. */
+			if ("[" in relPath) 
+				throw new GICR.RepositoryException.INTERNAL ("Index not allowed");
+
+			if (primaryNodeTypeName == null) {
+				/* TODO */
+			}
+
+			/* TODO */
+			/* Validate primary node type */
+
+			/* TODO */
+			/* Check if given property exists at the same path */
+
+			/* TODO, */
+			/* add nodes if there's a path with more than one element */
+
+			return this.append_node (relPath, primaryNodeTypeName);
 		}
 
 		/**
@@ -243,7 +274,7 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public string get_corresponding_node_path (string workspaceName) throws GICR.ItemNotFoundException, GICR.NoSuchWorkspaceException, GICR.AccessDeniedException { 
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+			throw new GICR.ItemNotFoundException.INTERNAL ("Not Supported");
 		}
 
 		/**
@@ -257,7 +288,7 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public void remove_shared_set () throws GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException { 
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+			throw new GICR.ConstraintViolationException.INTERNAL ("Not Supported");
 		}
 
 		/**
@@ -362,14 +393,14 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public bool is_new () {
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+			return this.isNew;
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public bool is_modified () {
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+			return this.isModified;
 		}
 
 		/**
