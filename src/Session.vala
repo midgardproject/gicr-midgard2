@@ -12,17 +12,18 @@ namespace Midgard2CR {
 		private string userID = null;
 		private Workspace workspace = null;
 		private Node rootNode = null;
-		private Midgard.Connection connection = null;
 		private Midgard.User user = null;
 		private Midgard.Object rootObject = null;
 		private Credentials credentials = null;
 		private bool isAnonymous = true;
 
+		public Midgard.Connection connection {get; construct;}
+
 		/**
 		 *
 		 */
 		public Session (Midgard.Connection cnc, Repository repository, Midgard.User? user, Midgard.Object rootObject, Credentials? crds) {
-			this.connection = cnc;
+			GLib.Object ("connection", cnc);
 			this.repository = repository;
 			this.user = user;
 			this.rootObject = rootObject;
@@ -107,7 +108,7 @@ namespace Midgard2CR {
 			var rNode = this.get_root_node ();
 			if (absPath == "/")
 				return rNode;
-			return rNode.get_node (absPath.substring (1, -1));
+			return rNode.get_node (Path.is_absolute (absPath) ? absPath.substring (1, -1) : absPath);
 		}
 
 		/**
