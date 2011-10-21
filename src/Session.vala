@@ -23,7 +23,7 @@ namespace Midgard2CR {
 		 *
 		 */
 		public Session (Midgard.Connection cnc, Repository repository, Midgard.User? user, Midgard.Object rootObject, Credentials? crds) {
-			GLib.Object ("connection", cnc);
+			GLib.Object (connection: cnc);
 			this.repository = repository;
 			this.user = user;
 			this.rootObject = rootObject;
