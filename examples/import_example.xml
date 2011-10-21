@@ -1,5 +1,5 @@
-<!-- File originally copied from phpcr-api-tests: https://github.com/phpcr/phpcr-api-tests/blob/master/fixtures/general/base.xml -->	
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- File originally copied from phpcr-api-tests: https://github.com/phpcr/phpcr-api-tests/blob/master/fixtures/general/base.xml -->
 <sv:node xmlns:crx="http://www.day.com/crx/1.0"
          xmlns:lx="http://flux-cms.org/2.0"
          xmlns:test="http://liip.to/jackalope"
