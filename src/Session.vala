@@ -107,7 +107,7 @@ namespace Midgard2CR {
 			var rNode = this.get_root_node ();
 			if (absPath == "/")
 				return rNode;
-			return rNode.get_node (absPath);
+			return rNode.get_node (absPath.substring (1, -1));
 		}
 
 		/**
