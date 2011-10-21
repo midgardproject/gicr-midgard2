@@ -104,7 +104,10 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public GICR.Node get_node (string absPath) throws RepositoryException, PathNotFoundException {
-			throw new RepositoryException.INTERNAL ("Not supported");
+			var rNode = this.get_root_node ();
+			if (absPath == "/")
+				return rNode;
+			return rNode.get_node (absPath);
 		}
 
 		/**
@@ -195,7 +198,9 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public void import_xml (string parentAbsPath, string uri, int uuidBehavior) throws RepositoryException, RuntimeException, PathNotFoundException, ItemExistsException, ConstraintViolationException, VersionException, InvalidSerializedDataException, LockException {
-			throw new RepositoryException.INTERNAL ("Not supported");
+			XMLImporter importer = XMLImporterFactory.create_importer_from_file (this, parentAbsPath, uuidBehavior, uri);
+			importer.execute ();
+			this.save (); 	
 		}
 
 		/**
