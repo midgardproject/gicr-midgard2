@@ -18,8 +18,8 @@ namespace Midgard2CR {
 
 	public class XMLDocumentViewImporter : XMLImporter {
 
-		public XMLDocumentViewImporter (GICR.Session session, Xml.Doc* doc) {
-			base (session, doc);
+		public XMLDocumentViewImporter (GICR.Session session, string path, int uuidB, Xml.Doc* doc) {
+			base (session, path, uuidB, doc);
 		}
 
 		~XMLDocumentViewImporter () {
@@ -33,17 +33,24 @@ namespace Midgard2CR {
                         return null;
                 }
 
+                /** 
+                 * {@inheritDoc}
+                 */
+		public override void execute () {
+
+		}
+
 		/* 
 		 * {@inheritDoc}
 		 */
-		public override GICR.Node create_cr_node (Xml.Node xmlNode) {
+		public override Midgard2CR.Node create_cr_node (Xml.Node xmlNode) {
 			return null;
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
-		public override GICR.Node[] create_cr_nodes (Xml.Node xmlNode) {
+		public override Midgard2CR.Node[] create_cr_nodes (Xml.Node xmlNode) {
 			return null;
 		} 
 	}
