@@ -22,7 +22,7 @@ namespace Midgard2CR {
 	public class Path : GLib.Object {
 
 		public static bool is_absolute (string path) {
-			if (path[0] == "/")
+			if (path[0] == '/')
 				return true;	
 			return false;
 		}
