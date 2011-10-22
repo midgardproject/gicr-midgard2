@@ -55,11 +55,30 @@ namespace Midgard2CR {
 		}
 
 		private Node append_node (string name, string? primaryNodeTypeName) throws GICR.ItemExistsException, GICR.ConstraintViolationException, GICR.RepositoryException {
+			/* Check if node has children with given name. If yes, throw exception */
 			if (this.children != null
 				&& this.children.has_key (name))
 				throw new GICR.ItemExistsException.INTERNAL ("Node at path '%s/%s' exists ", this.get_path (), name);
 
+			/* Create Midgard node which will store node's data */
 			var midgardNode = Midgard.Object.factory (this.session.connection, "midgard_node", "");	
+			midgardNode.set (
+				"name", name,
+				"typename", primaryNodeTypeName.dup ().replace (":", "-")
+			);
+			
+			var newNode = new Node (this.session, midgardNode, this);
+			newNode.isNew = true;
+			/* FIXME, enable when implemented 
+			 * newNode.set_node_property ("jcr:primaryType", primaryNodeTypeName, PropertyType.NAME); */
+			newNode.isModified = true;
+			
+			/* Set new node as a child of current one */
+			if (this.children == null)
+				this.children = new Gee.HashMap <string, Object>();	
+			this.children[name] = newNode;
+
+			return newNode;	
 		}
 
 		/**
