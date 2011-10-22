@@ -29,4 +29,5 @@ src/*.lo
 src/gicr-midgard2.h
 src/*.la
 src/*.stamp
+src/*.swp
 src/impl/*.c
