@@ -38,5 +38,11 @@ namespace Midgard2CR {
 				return path.substring (1, -1);
 			return path;
 		}
+			
+		public static bool has_separator (string path) {
+			if ("/" in path)
+				return true;
+			return false;
+		}
 	}
 }
