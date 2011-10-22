@@ -24,6 +24,7 @@ namespace Midgard2CR {
 		private bool isRoot = false;
 		private string name = null;
 		private Gee.HashMap <string, Object>children = null;
+		private Gee.HashMap <string, Object>properties = null;
 		private bool isNew = true;
 		private bool isModified = false;
 
@@ -115,11 +116,56 @@ namespace Midgard2CR {
 			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
 		}
 
+		private void populate_properties () {
+			if (this.properties != null)
+				return;
+
+			this.properties = new Gee.HashMap <string, Object>();
+
+			/* TODO, populate properties */
+		}
+
 		/**
 		 * {@inheritDoc}
 		 */
-		public GICR.Property set_node_property (string name, Value val, int? type) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException { 
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+		public GICR.Property set_node_property (string name, Value? val, int? type) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException { 
+
+			/* Initialize properties sotre and populate available ones */
+			this.populate_properties ();
+			/* Check if name is not a path */
+			if (Path.has_separator (name)) 
+				throw new GICR.ConstraintViolationException.INTERNAL ("Can not set property name with '/' separator");
+
+			/* If Value is null, remove property */
+			if (val == null) {
+				/* TODO 
+				 * get property definition
+				 * check if property is protected - ConstraintViolationException
+				 * check if property is mandatory - ConstraintViolationException
+				 * remove property */
+			}
+
+			/* Validate property type */
+			/* TODO
+			 * From property definition, get required type.
+			 * If defined, compare with given one.
+			 * Throw ConstraintViolationException in case of mismateched */			
+
+			/* Set property is basically setting value, so first try to get property.
+			 * If it doesn't exist, create new one, and then set value */
+			Midgard2CR.Property property = null;
+			try {
+				property = (Midgard2CR.Property) this.get_node_property (name);
+			} catch (GICR.PathNotFoundException e) {
+				
+			}
+			property.set_value (val, type);
+		
+			/* We need property's flag to determine if property value has been changed.
+			 If not, we should not mark node as modified one */
+			this.isModified = true;
+			
+			return (GICR.Property) property;
 		}
 
 		/**
