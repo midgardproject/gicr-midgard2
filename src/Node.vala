@@ -157,7 +157,7 @@ namespace Midgard2CR {
 			try {
 				property = (Midgard2CR.Property) this.get_node_property (name);
 			} catch (GICR.PathNotFoundException e) {
-				
+				property = new Property (this, name, null);		
 			}
 			property.set_value (val, type);
 		
@@ -186,6 +186,29 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public GICR.Property get_node_property (string relPath) throws GICR.PathNotFoundException, GICR.InvalidArgumentException, GICR.RepositoryException { 
+			this.populate_properties ();
+			
+			/* Check if relative path has been given.
+			 * If yes, get node and then this node's property */
+			if (Path.has_separator (relPath)) {
+				/* TODO 
+				 * split path 
+				 return this.get_node (path).get_node_property (last_element); */
+			}
+
+			if (this.properties.has_key (relPath) == false) 
+				throw new GICR.PathNotFoundException.INTERNAL ("Property '%s' not found", relPath);
+
+			/* If there's property's key and value is not a Property object, create it */
+			Property prop = (Midgard2CR.Property) this.properties[relPath];
+			if (prop == null) {
+				/* TODO
+				 * Initialize Property object 
+				 * set it as valueto corresponding key */
+			}
+
+			return (GICR.Property) prop;
+
 			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
 		}
 
@@ -444,7 +467,7 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public GICR.Session get_session () throws GICR.RepositoryException {
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+			return this.session;
 		}
 
 		/**
