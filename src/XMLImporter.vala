@@ -58,7 +58,7 @@ namespace Midgard2CR {
 		 * @param xmlNode a {@link Xml.Node} to create Midgard2CR.Node node from 
 		 * @return Midgard2CR.Node 
 		 */
-		public abstract Midgard2CR.Node create_cr_node (Xml.Node xmlNode);
+		//public abstract Midgard2CR.Node create_cr_node (Xml.Node xmlNode);
 
 		/**
 		 * Create {@link Node} nodes which are child of the node represented by given Xml.Node.
