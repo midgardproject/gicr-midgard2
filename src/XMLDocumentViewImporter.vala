@@ -43,7 +43,7 @@ namespace Midgard2CR {
 		/* 
 		 * {@inheritDoc}
 		 */
-		public override Midgard2CR.Node create_cr_node (Xml.Node xmlNode) {
+		public Midgard2CR.Node create_cr_node (Xml.Node xmlNode) {
 			return null;
 		}
 
