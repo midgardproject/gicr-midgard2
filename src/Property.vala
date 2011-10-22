@@ -19,7 +19,7 @@ namespace Midgard2CR {
 	/**
 	 * {@inheritDoc}
 	 */	
-	public class Property : GLib.Object, GICR.Item {
+	public class Property : GLib.Object, GICR.Item, GICR.Property {
 
 		/**
 		 * {@inheritDoc}
@@ -317,15 +317,42 @@ namespace Midgard2CR {
 		public const string JCR_STATEMENT = "{http://www.jcp.org/jcr/1.0}statement";
 
 		/* Private members */
-		private GICR.Session session = null;
+		private Midgard2CR.Session session = null;
 		private GICR.Node parent = null;
+		private bool isNew = false;
+		private bool isModified = false;
+		private Midgard.Object midgardProperty = null;
+
+		public Property (Midgard2CR.Node parentNode, string name, Midgard.Object? midgardProperty) {
+			if (midgardProperty == null) {
+				this.midgardProperty = Midgard.Object.factory (((Midgard2CR.Session)parentNode.get_session ()).connection, "midgard_node_property", "");
+				this.midgardProperty.set ("name", name);
+				this.midgardProperty.set ("type", GICR.PropertyType.STRING); /* By default we set string type */
+			} else {
+				this.midgardProperty = midgardProperty;
+			}
+			this.parent = parentNode;	
+		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public void set_value (Value val, int type) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException, GICR.InvalidArgumentException {
-			throw new GICR.RepositoryException.INTERNAL ("Not supported");
+			/* Validate value - ValueFormatExcdeption */
+			/* TODO, this.validateValue (val, type); */
+
+			/* TODO */
+			/* Check if property is registered.
+			 * If it is, we need to validate if conversion follows the spec: "3.6.4 Property Type Conversion" */
+
+			/* TODO */
+			/* Handle multiple properties */
+			this.midgardProperty.set (
+				"value", val.get_string (),
+				"type", type
+			);
 		}
+
 
 		/**
 		 * {@inheritDoc}
@@ -353,7 +380,9 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public string get_string () throws GICR.ValueFormatException, GICR.RepositoryException {
-			throw new GICR.RepositoryException.INTERNAL ("Not supported");
+			string strval = "";
+			this.midgardProperty.get ("value", out strval);
+			return strval;
 		}
 
 		/**
@@ -401,14 +430,14 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public Node get_node () throws GICR.ValueFormatException, GICR.RepositoryException, GICR.ItemNotFoundException {
+		public GICR.Node get_node () throws GICR.ValueFormatException, GICR.RepositoryException, GICR.ItemNotFoundException {
 			throw new GICR.RepositoryException.INTERNAL ("Not supported");
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
-		public GICR.Property get_property () throws GICR.ValueFormatException, GICR.RepositoryException, GICR.ItemNotFoundException {
+		public GICR.Property get_node_property () throws GICR.ValueFormatException, GICR.RepositoryException, GICR.ItemNotFoundException {
 			throw new GICR.RepositoryException.INTERNAL ("Not supported");
 		}
 
@@ -486,7 +515,7 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public GICR.Session get_session () throws GICR.RepositoryException {
-			return this.session;
+			return this.parent.get_session ();
 		}
 
 		/**
