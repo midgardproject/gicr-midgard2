@@ -1,0 +1,11 @@
+.libs
+.deps/
+.gitignore
+@
+Midgard2CR.db
+node-property
+session-import
+session-login
+*.stamp
+*.log
+
