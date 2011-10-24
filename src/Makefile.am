@@ -38,6 +38,7 @@ libgicrmidgard2_la_SOURCES = \
 		     Node.vala \
 		     Property.vala \
 		     impl/Path.vala \
+		     impl/NameMapper.vala \
 		     $(NULL)
 			  
 libgicrmidgard2_la_LDFLAGS = -module -export-dynamic @GICR_MIDGARD2_ABI_MAJOR@:0:0
