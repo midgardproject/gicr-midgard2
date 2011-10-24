@@ -14,7 +14,7 @@ namespace Midgard2CR {
 		private Node rootNode = null;
 		private Midgard.User user = null;
 		private Midgard.Object rootObject = null;
-		private Credentials credentials = null;
+		private GICR.Credentials credentials = null;
 		private bool isAnonymous = true;
 
 		public Midgard.Connection connection {get; construct;}
@@ -22,7 +22,7 @@ namespace Midgard2CR {
 		/**
 		 *
 		 */
-		public Session (Midgard.Connection cnc, Repository repository, Midgard.User? user, Midgard.Object rootObject, Credentials? crds) {
+		public Session (Midgard.Connection cnc, Repository repository, Midgard.User? user, Midgard.Object rootObject, GICR.Credentials? crds) {
 			GLib.Object (connection: cnc);
 			this.repository = repository;
 			this.user = user;
@@ -83,7 +83,7 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public GICR.Session impersonate (Credentials credentials) throws LoginException, RepositoryException {
+		public GICR.Session impersonate (GICR.Credentials credentials) throws LoginException, RepositoryException {
 			throw new LoginException.INTERNAL ("Not supported");
 		}
 
