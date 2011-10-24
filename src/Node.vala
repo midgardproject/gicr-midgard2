@@ -72,17 +72,18 @@ namespace Midgard2CR {
 				throw new GICR.ItemExistsException.INTERNAL ("Node at path '%s/%s' exists ", this.get_path (), name);
 
 			/* Handle empty NodeTypeName case */
-			this.nodeType = primaryNodeTypeName;
+			var nodeType = primaryNodeTypeName;
 
 			/* Create Midgard node which will store node's data */
 			var midgardNode = Midgard.Object.factory (this.session.connection, "midgard_node", "");	
 			midgardNode.set (
 				"name", name,
-				"typename", NameMapper.get_midgard_type_name (this.nodeType)
+				"typename", NameMapper.get_midgard_type_name (nodeType)
 			);
 			
 			var newNode = new Node (this.session, midgardNode, this);
 			newNode.isNew = true;
+			newNode.nodeType = nodeType;
 			/* FIXME, enable when implemented 
 			 * newNode.set_node_property ("jcr:primaryType", primaryNodeTypeName, PropertyType.NAME); */
 			newNode.isModified = true;
