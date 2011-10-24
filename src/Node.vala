@@ -18,7 +18,8 @@ namespace Midgard2CR {
 
 	public class Node : GLib.Object, GICR.Item, GICR.Node {
 
-		private Midgard.Object midgardNode = null; 
+		private Midgard.Object midgardNode = null;
+		private Midgard.Object contentObject = null; 
 		private Midgard2CR.Session session = null;
 		private Node parent = null;
 		private bool isRoot = false;
@@ -27,6 +28,7 @@ namespace Midgard2CR {
 		private Gee.HashMap <string, Object>properties = null;
 		private bool isNew = true;
 		private bool isModified = false;
+		private string nodeType = null;
 
 		/**
 		 * Constructor
@@ -55,17 +57,28 @@ namespace Midgard2CR {
 			this.parent = parent;
 		}
 
+		public Midgard.Object get_content_object () {
+			if (this.contentObject == null)
+				this.contentObject = Midgard.Object.factory (this.session.connection, 
+					NameMapper.get_midgard_type_name (this.nodeType),
+					"" );
+			return this.contentObject;
+		}
+
 		private Node append_node (string name, string? primaryNodeTypeName) throws GICR.ItemExistsException, GICR.ConstraintViolationException, GICR.RepositoryException {
 			/* Check if node has children with given name. If yes, throw exception */
 			if (this.children != null
 				&& this.children.has_key (name))
 				throw new GICR.ItemExistsException.INTERNAL ("Node at path '%s/%s' exists ", this.get_path (), name);
 
+			/* Handle empty NodeTypeName case */
+			this.nodeType = primaryNodeTypeName;
+
 			/* Create Midgard node which will store node's data */
 			var midgardNode = Midgard.Object.factory (this.session.connection, "midgard_node", "");	
 			midgardNode.set (
 				"name", name,
-				"typename", primaryNodeTypeName.dup ().replace (":", "-")
+				"typename", NameMapper.get_midgard_type_name (this.nodeType)
 			);
 			
 			var newNode = new Node (this.session, midgardNode, this);
