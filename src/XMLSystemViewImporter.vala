@@ -74,7 +74,7 @@ namespace Midgard2CR {
 			return "";
 		}
 
-		private void add_node (Xml.Node *node, Midgard2CR.Node parentNode) {
+		private void add_node (Xml.Node *node, Midgard2CR.Node parentNode) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException, GICR.PathNotFoundException, GICR.ItemExistsException, GICR.InvalidArgumentException {
 			for (Xml.Node* iter = node->children; iter != null; iter = iter->next) {
 				if (iter->type != Xml.ElementType.ELEMENT_NODE
 					|| iter->name != "node") 
@@ -84,7 +84,7 @@ namespace Midgard2CR {
 			}
 		} 
 
-		public override void execute () {
+		public override void execute () throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException, GICR.PathNotFoundException, GICR.ItemExistsException, GICR.InvalidArgumentException {
 			Xml.Node* root = this.xmlDocument->get_root_element ();
 
 			if (root == null)
@@ -95,7 +95,7 @@ namespace Midgard2CR {
 			this.add_node (root, newNode);
 		}
 
-		private void add_properties (Xml.Node *node, Midgard2CR.Node crNode) {
+		private void add_properties (Xml.Node *node, Midgard2CR.Node crNode) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException {
 			for (Xml.Node* iter = node->children; iter != null; iter = iter->next) {
 				if (iter->type != Xml.ElementType.ELEMENT_NODE
 					|| iter->name != "property") 
@@ -117,7 +117,7 @@ namespace Midgard2CR {
 			}
 		}
 
-		public Midgard2CR.Node create_cr_node (Xml.Node *parentXmlNode, Midgard2CR.Node parentNode) {
+		public Midgard2CR.Node create_cr_node (Xml.Node *parentXmlNode, Midgard2CR.Node parentNode) throws GICR.ItemExistsException, GICR.PathNotFoundException, GICR.ConstraintViolationException, GICR.VersionException, GICR.LockException, GICR.InvalidArgumentException, GICR.RepositoryException, GICR.ValueFormatException {
 			stdout.printf ("Create new node '%s' ('%s') under '%s' \n", 
 				this.get_attribute_by_name (parentXmlNode, "name"),
 				get_nodetype (parentXmlNode),

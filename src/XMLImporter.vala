@@ -48,7 +48,7 @@ namespace Midgard2CR {
 		 * 
 		 * From associated xml document create Node objects and adds them to the repository.
 		 */
-		public abstract void execute ();
+		public abstract void execute () throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException, GICR.PathNotFoundException, GICR.ItemExistsException, GICR.InvalidArgumentException;
 
 		/* 
 		 * Create {@link Node} from Xml.Node.
