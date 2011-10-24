@@ -322,6 +322,7 @@ namespace Midgard2CR {
 		private bool isNew = false;
 		private bool isModified = false;
 		private Midgard.Object midgardProperty = null;
+		private bool isMultiple = false;
 
 		public Property (Midgard2CR.Node parentNode, string name, Midgard.Object? midgardProperty) {
 			if (midgardProperty == null) {
@@ -344,6 +345,8 @@ namespace Midgard2CR {
 			/* TODO */
 			/* Check if property is registered.
 			 * If it is, we need to validate if conversion follows the spec: "3.6.4 Property Type Conversion" */
+
+			
 
 			/* TODO */
 			/* Handle multiple properties */
@@ -396,14 +399,14 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public long get_long () throws GICR.ValueFormatException, GICR.RepositoryException {
-			throw new GICR.RepositoryException.INTERNAL ("Not supported");
+			return long.parse (this.get_string ());
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
-		public float get_double () throws GICR.ValueFormatException, GICR.RepositoryException {
-			throw new GICR.RepositoryException.INTERNAL ("Not supported");
+		public double get_double () throws GICR.ValueFormatException, GICR.RepositoryException {
+			return double.parse (this.get_string ());
 		}
 
 		/**
@@ -424,7 +427,7 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public bool get_boolean () throws GICR.ValueFormatException, GICR.RepositoryException {
-			throw new GICR.RepositoryException.INTERNAL ("Not supported");
+			return bool.parse (this.get_string ());
 		}
 
 		/**
@@ -473,7 +476,17 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public bool is_multiple () throws GICR.RepositoryException {
-			throw new GICR.RepositoryException.INTERNAL ("Not supported");
+			/* Either set explicitly by property definition or property holds value array */
+			if (this.isMultiple == true)
+				return true;
+			
+			/* TODO
+			 * Check  property definition*/
+
+			/* Check midgard node_property flag */
+			
+			/* finally return false */
+			return false; 
 		}
 
 		/**
