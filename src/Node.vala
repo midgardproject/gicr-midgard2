@@ -65,6 +65,10 @@ namespace Midgard2CR {
 			return this.contentObject;
 		}
 
+		public string get_type_name () {
+			return this.nodeType;
+		}		
+
 		private Node append_node (string name, string? primaryNodeTypeName) throws GICR.ItemExistsException, GICR.ConstraintViolationException, GICR.RepositoryException {
 			/* Check if node has children with given name. If yes, throw exception */
 			if (this.children != null
@@ -466,7 +470,7 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public GICR.Item get_parent () throws GICR.RepositoryException, GICR.ItemNotFoundException, GICR.AccessDeniedException {
+		public GICR.Node get_parent () throws GICR.RepositoryException, GICR.ItemNotFoundException, GICR.AccessDeniedException {
 			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
 		}
 
