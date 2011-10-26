@@ -318,11 +318,14 @@ namespace Midgard2CR {
 
 		/* Private members */
 		private Midgard2CR.Session session = null;
-		private GICR.Node parent = null;
+		private Midgard2CR.Node parent = null;
 		private bool isNew = false;
 		private bool isModified = false;
 		private Midgard.Object midgardProperty = null;
 		private bool isMultiple = false;
+		private ValueArray values = null;
+		private string name = null;
+		private uint type = 0;		
 
 		public Property (Midgard2CR.Node parentNode, string name, Midgard.Object? midgardProperty) {
 			if (midgardProperty == null) {
@@ -332,50 +335,138 @@ namespace Midgard2CR {
 			} else {
 				this.midgardProperty = midgardProperty;
 			}
+			this.name = name;
 			this.parent = parentNode;	
 		}
 
+		private ParamSpec get_property_spec () {
+			Type klassType = Type.from_name (NameMapper.get_midgard_type_name (this.parent.get_type_name ()));
+			return ((ObjectClass) klassType.class_peek ()).
+				find_property (NameMapper.get_midgard_property_name (this.get_name ()));
+		}
+
+		private void set_internal_values (Value val, bool append) {
+			if (this.get_property_spec () != null) {
+				this.parent.get_content_object ().set (
+					NameMapper.get_midgard_property_name (this.get_name ()), 
+					val.get_string ()
+				);
+				return; 
+			}
+			
+			if (this.values == null)
+				this.values = new ValueArray (0);			
+
+			if (append == false) {
+				if (this.values.n_values > 0)
+					this.values.get_nth (0).unset ();
+			}
+			this.values.append (val);
+		}
+
+		private unowned ValueArray get_internal_values () {
+			if (this.values == null)
+				this.values = new ValueArray (1);
+			var pspec = this.get_property_spec ();
+			if (pspec != null) {
+				Value val = {};
+				val.init (pspec.value_type);
+				this.parent.get_content_object ().get (this.get_name (), ref val);
+				this.values.append (val);
+			}
+			return this.values;	
+		}
+		
 		/**
 		 * {@inheritDoc}
 		 */
 		public void set_value (Value val, int type) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException, GICR.InvalidArgumentException {
-			/* Validate value - ValueFormatExcdeption */
+			this.append_internal_value (val, type, false);
+		}
+
+		private void append_internal_value (Value val, int type, bool append) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException, GICR.InvalidArgumentException {
+
+			/* Validate value - ValueFormatException */
 			/* TODO, this.validateValue (val, type); */
 
 			/* TODO */
 			/* Check if property is registered.
-			 * If it is, we need to validate if conversion follows the spec: "3.6.4 Property Type Conversion" */
-
-			
+			 * If it is, we need to validate if conversion follows the spec: "3.6.4 Property Type Conversion" */	
 
 			/* TODO */
 			/* Handle multiple properties */
-			this.midgardProperty.set (
-				"value", val.get_string (),
-				"type", type
-			);
-		}
 
+			Value newValue = {};
+			newValue.init (typeof (string));
+
+			int propertyType = type;
+			if (val.holds (typeof (Object)) == true) {
+				/* Value holds Node */
+				Object valueObject = val.get_object ();
+				if (valueObject is GICR.Node) {
+					if (type == 0) {
+						propertyType = GICR.PropertyType.REFERENCE;
+					}
+					newValue.set_string (((GICR.Node)valueObject).get_node_property ("jcr:uuid").get_string());
+				}
+				/* Value is a Property */
+				if (valueObject is GICR.Property) {
+					newValue.set_string (((GICR.Property)valueObject).get_string ());
+				}
+			/* Value holds DateTime */
+			} else if (val.holds (typeof (GLib.DateTime))) {
+				
+			} else {
+				val.transform (ref newValue);
+			}
+			
+			/* TODO */
+			/* Set default type if none specified */
+			this.type = propertyType;	
+			this.set_internal_values (newValue, false);			
+		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public void set_values (ValueArray values, int type) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException, GICR.InvalidArgumentException {
-			throw new GICR.RepositoryException.INTERNAL ("Not supported");
+			/* TODO, determine if this property may hold multiple values */
+			if (this.values != null && this.values.n_values > 0)
+				this.values = null;
+			foreach (Value val in values) {
+				this.append_internal_value (val, type, true);
+			}	
 		}			
+
+		/* TODO
+		 * get_value () and get_values () could return owned values to improve performance.
+		 * Application should then copy value(s) if needed. 
+		 */ 
 
 		/**
 		 * {@inheritDoc}
 		 */
-		public Value get_value () {
-			throw new GICR.RepositoryException.INTERNAL ("Not supported");
+		public Value get_value () throws GICR.ValueFormatException, GICR.RepositoryException {
+			if (this.is_multiple () == true)
+				throw new GICR.ValueFormatException.INTERNAL ("Can not get single value of multi valued property");
+			
+			if (this.values != null)
+				return this.values.values[0];
+
+			throw new GICR.RepositoryException.INTERNAL ("Can not access value. Holder not initialized");
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
-		public ValueArray get_values () {
-			throw new GICR.RepositoryException.INTERNAL ("Not supported");
+		public ValueArray get_values () throws GICR.ValueFormatException, GICR.RepositoryException {
+			if (this.is_multiple () == false)
+				throw new GICR.ValueFormatException.INTERNAL ("Can not get values of single valued property");
+			
+			if (this.values != null)
+				return this.values.copy ();
+
+			throw new GICR.RepositoryException.INTERNAL ("Can not access value. Holder not initialized");	
 		}
 
 
@@ -383,22 +474,28 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public string get_string () throws GICR.ValueFormatException, GICR.RepositoryException {
-			string strval = "";
-			this.midgardProperty.get ("value", out strval);
-			return strval;
+			if (this.is_multiple () == true)
+				throw new GICR.ValueFormatException.INTERNAL ("Can not get value of multi valued property");	
+			var val = this.get_value ();
+			return val.get_string ();
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
-		public GLib.IOChannel get_binary () throws GICR.RepositoryException {
-			throw new GICR.RepositoryException.INTERNAL ("Not supported");
+		public GLib.DataInputStream get_binary () throws GICR.RepositoryException {
+			if (this.is_multiple () == true)
+				throw new GICR.ValueFormatException.INTERNAL ("Can not get value of multi valued property");
+			GLib.InputStream inputStream = new MemoryInputStream.from_data (this.values.values[0].get_string ().data, GLib.g_free);
+			return new DataInputStream (inputStream);
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public long get_long () throws GICR.ValueFormatException, GICR.RepositoryException {
+			if (this.is_multiple () == true)
+				throw new GICR.ValueFormatException.INTERNAL ("Can not get value of multi valued property");
 			return long.parse (this.get_string ());
 		}
 
@@ -406,13 +503,17 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public double get_double () throws GICR.ValueFormatException, GICR.RepositoryException {
+			if (this.is_multiple () == true)
+				throw new GICR.ValueFormatException.INTERNAL ("Can not get value of multi valued property");
 			return double.parse (this.get_string ());
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
-		public double get_decimal () throws GICR.ValueFormatException, GICR.RepositoryException {
+		public float get_float () throws GICR.ValueFormatException, GICR.RepositoryException {
+			if (this.is_multiple () == true)
+				throw new GICR.ValueFormatException.INTERNAL ("Can not get value of multi valued property");
 			throw new GICR.RepositoryException.INTERNAL ("Not supported");
 		}
 
@@ -420,6 +521,8 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public DateTime get_date () throws GICR.ValueFormatException, GICR.RepositoryException {
+			if (this.is_multiple () == true)
+				throw new GICR.ValueFormatException.INTERNAL ("Can not get value of multi valued property");
 			throw new GICR.RepositoryException.INTERNAL ("Not supported");
 		}
 
@@ -427,6 +530,8 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public bool get_boolean () throws GICR.ValueFormatException, GICR.RepositoryException {
+			if (this.is_multiple () == true)
+				throw new GICR.ValueFormatException.INTERNAL ("Can not get value of multi valued property");
 			return bool.parse (this.get_string ());
 		}
 
@@ -434,6 +539,9 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public GICR.Node get_node () throws GICR.ValueFormatException, GICR.RepositoryException, GICR.ItemNotFoundException {
+			if (this.is_multiple () == true)
+				throw new GICR.ValueFormatException.INTERNAL ("Can not get value of multi valued property");
+
 			throw new GICR.RepositoryException.INTERNAL ("Not supported");
 		}
 
@@ -468,8 +576,8 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public int get_property_type () throws GICR.RepositoryException {
-			throw new GICR.RepositoryException.INTERNAL ("Not supported");
+		public uint get_property_type () throws GICR.RepositoryException {
+			return this.type;
 		}
 
 		/**
@@ -500,7 +608,7 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public string get_name () throws GICR.RepositoryException {
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+			return this.name;
 		}
 
 		/**
@@ -513,8 +621,8 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public GICR.Item get_parent () throws GICR.RepositoryException, GICR.ItemNotFoundException, GICR.AccessDeniedException {
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+		public GICR.Node get_parent () throws GICR.RepositoryException, GICR.ItemNotFoundException, GICR.AccessDeniedException {
+			return this.parent;
 		}
 
 		/**
@@ -535,21 +643,21 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public bool is_node () {
-			return true;
+			return false;
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public bool is_new () {
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+			return this.isNew;
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public bool is_modified () {
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+			return this.isModified;
 		}
 
 		/**
