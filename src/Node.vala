@@ -28,6 +28,7 @@ namespace Midgard2CR {
 		private Gee.HashMap <string, Object>properties = null;
 		private bool isNew = true;
 		private bool isModified = false;
+		private bool toRemove = false;
 		private string nodeType = null;
 
 		/**
@@ -193,11 +194,19 @@ namespace Midgard2CR {
 			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
 		}
 
+		private void populate_children () {
+
+		}
+
+		private Node[] internal_get_nodes (string[]? filter, bool fromStorage) throws GICR.RepositoryException {
+			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+		}
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public Node[] get_nodes (string[]? filter) throws GICR.RepositoryException { 
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+			return this.internal_get_nodes (filter, true);
 		}
 
 		/**
@@ -527,6 +536,71 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public void remove () throws GICR.RepositoryException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.AccessDeniedException {
+			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+		}
+
+		private void internal_properties_save ()
+		{
+			/* TODO */	
+		}
+
+		private void internal_node_create () {
+			if (this.get_content_object ().create () == false) {
+				this.midgardNode.set (
+					"typename", this.contentObject.get_type ().name (),
+					"objectguid", this.contentObject.guid
+				);
+			
+				var parentNode = this.parent.midgardNode;
+				uint propID;
+				parentNode.get ("id", out propID);
+				this.midgardNode.set (
+					"parentguid", parentNode.guid,
+					"parent", propID
+				);
+				this.midgardNode.create ();
+			} else {
+				throw new GICR.RepositoryException.INTERNAL (this.session.connection.get_error_string ());
+			}
+		}
+
+		private void internal_node_update () {
+			if (this.midgardNode.update () == true) 
+				this.contentObject.update ();
+
+			if (this.session.connection.get_error () != Midgard.GenericError.OK)
+				throw new GICR.RepositoryException.INTERNAL (this.session.connection.get_error_string ());
+		}
+
+		private void internal_node_save () {
+			/* Remove node if flag indicates this */
+			if (this.toRemove == true) {
+				this.remove ();	
+				return;
+			}
+
+                        /* Create Midgad node and content object */
+			if (this.is_new () == true) 
+				this.internal_node_create ();
+
+			/* Update Modgard node and content object */
+			if (this.is_modified () == true)
+				this.internal_node_update ();
+
+			this.isNew = false;
+			this.isModified = false;
+			
+			this.internal_properties_save (); 
+
+			/* Get children and perform save */
+                        Node[] children = (Midgard2CR.Node[]) this.internal_get_nodes (null, false);
+                        foreach (weak Node n in children) {
+                                n.internal_node_save ();
+                        }
+                }
+
+		public void save () throws GICR.AccessDeniedException, GICR.ItemExistsException, GICR.ConstraintViolationException, GICR.InvalidItemStateException, GICR.ReferentialIntegrityException, GICR.VersionException, GICR.LockException, GICR.NoSuchNodeTypeException, GICR.RepositoryException {
+			this.internal_node_save ();
 			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
 		}
 	}
