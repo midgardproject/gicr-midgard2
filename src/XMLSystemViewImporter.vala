@@ -112,7 +112,7 @@ namespace Midgard2CR {
 				crNode.set_node_property (
 					get_attribute_by_name (iter, "name"),
 					get_property_value (iter),
-					GICR.PropertyType.value_from_name (get_attribute_by_name (iter, "type"))
+					(int) GICR.PropertyType.value_from_name (get_attribute_by_name (iter, "type"))
 				);
 			}
 		}
