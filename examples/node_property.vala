@@ -23,8 +23,24 @@ void main () {
 
 	/* Add new node to root one and set new property */
 	var newNode = rootNode.add_node ("ExampleNode", "nt:unstructured");
-	var newProperty = newNode.set_node_property ("ExampleProperty", "Hello example property!", GICR.PropertyType.STRING);
-	stdout.printf ("New property has been set with value: '%s' \n", newProperty.get_string ());
+
+	/* Set string property */
+	var newProperty = newNode.set_node_property ("ExampleProperty_STRING", "Hello example property!", GICR.PropertyType.STRING);
+	stdout.printf ("New PropertyType.STRING : '%s' \n", newProperty.get_string ());
+	
+	/* Set long property */
+	newProperty = newNode.set_node_property ("ExampleProperty_LONG", 123456, GICR.PropertyType.LONG);
+	stdout.printf ("New PropertyType.LONG : '%ld' \n", newProperty.get_long ());
+
+	/* Set bool property */
+	newProperty = newNode.set_node_property ("ExampleProperty_BOOLEAN", false, GICR.PropertyType.BOOLEAN);
+	stdout.printf ("New PropertyType.BOOLEAN : (%i) '%s' \n", (int) newProperty.get_boolean (), newProperty.get_string ());
+
+	/* Set binary property */
+	string binary_buffer;
+        FileUtils.get_contents ("example_binary", out binary_buffer);
+	newProperty = newNode.set_node_property ("ExampleProperty_BINARY", binary_buffer, GICR.PropertyType.BINARY);
+	stdout.printf ("New PropertyType.BINARY : '%s' \n", newProperty.get_string ());
 }
 
 
