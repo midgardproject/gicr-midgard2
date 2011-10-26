@@ -36,9 +36,10 @@ libgicrmidgard2_la_SOURCES = \
 		     XMLSystemViewImporter.vala \
 		     XMLDocumentViewImporter.vala \
 		     Node.vala \
-		     Property.vala \
+		     Property.vala \ 
 		     impl/Path.vala \
 		     impl/NameMapper.vala \
+		     impl/HelperType.vala \ 
 		     $(NULL)
 			  
 libgicrmidgard2_la_LDFLAGS = -module -export-dynamic @GICR_MIDGARD2_ABI_MAJOR@:0:0
@@ -48,7 +49,7 @@ src_libgicrmidgard2_la_CPPFLAGS = \
 			  -I$(top_srcdir)/src \
 			  -DG_LOG_DOMAIN=\"$(midgard2cr_namespace)\"
 
-VALAFLAGS = --vapi=$(gicr_midgard2_vapi_file) -H $(gicr_midgard2_header) --gir=$(gicr_midgard2_gir_file) --library gicr-midgard2 --pkg Midgard --pkg GICR-1.0 --pkg libxml-2.0 --pkg gee-1.0
+VALAFLAGS = --vapi=$(gicr_midgard2_vapi_file) -H $(gicr_midgard2_header) --gir=$(gicr_midgard2_gir_file) --library gicr-midgard2 --pkg Midgard --pkg GICR-1.0 --pkg libxml-2.0 --pkg gee-1.0 --pkg gio-2.0
 
 CLEANFILES = \
 	     $(gicr_midgard2_vapi_file) \
