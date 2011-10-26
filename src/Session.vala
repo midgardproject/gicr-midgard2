@@ -119,28 +119,40 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public GICR.Property get_node_property (string absPath) throws RepositoryException, PathNotFoundException {
-			throw new RepositoryException.INTERNAL ("Not supported");
+			return this.get_root_node ().get_node_property (Path.get_relative (absPath));
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public bool item_exists (string absPath) throws RepositoryException {
-			throw new RepositoryException.INTERNAL ("Not supported");
+			return this.node_exists (absPath) == true ? true : this.property_exists (absPath);
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public bool node_exists (string absPath) throws RepositoryException {
-			throw new RepositoryException.INTERNAL ("Not supported");
+			/* TODO OPTIMIZE */
+			try {
+				this.get_node (absPath);
+				return true;
+			} catch (GICR.PathNotFoundException e) {
+				return false;
+			}
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public bool property_exists (string absPath) throws RepositoryException {
-			throw new RepositoryException.INTERNAL ("Not supported");
+			/* TODO OPTIMIZE */
+			try {
+				this.get_node_property (absPath);
+				return true;
+			} catch (GICR.PathNotFoundException e) {
+				return false;
+			}
 		}
 
 		/**
@@ -161,6 +173,12 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public void save () throws AccessDeniedException, ItemExistsException, ConstraintViolationException, InvalidItemStateException, ReferentialIntegrityException, VersionException, LockException, NoSuchNodeTypeException, RepositoryException {
+			
+			/* TODO, remove nodes marked to be removed */
+
+			Node rootNode = (Midgard2CR.Node) this.get_root_node ();
+			rootNode.save ();
+			
 			throw new RepositoryException.INTERNAL ("Not supported");
 		}
 
