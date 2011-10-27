@@ -90,6 +90,7 @@ namespace Midgard2CR {
 			/* Query midgard_node table and check if there's already root node */
 			var qst = new Midgard.QueryStorage ("midgard_node");
 			var select = new Midgard.QuerySelect (cnc, qst);
+			select.toggle_read_only (false);
 			select.set_constraint (
 				new Midgard.QueryConstraint (
 					new Midgard.QueryProperty ("parent", null),
