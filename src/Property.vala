@@ -347,9 +347,10 @@ namespace Midgard2CR {
 
 		private void set_internal_values (Value val, bool append) {
 			if (this.get_property_spec () != null) {
-				this.parent.get_content_object ().set (
+	
+				this.parent.get_content_object ().set_property (
 					NameMapper.get_midgard_property_name (this.get_name ()), 
-					val.get_string ()
+					val 
 				);
 				return; 
 			}
