@@ -321,22 +321,28 @@ namespace Midgard2CR {
 		private Midgard2CR.Node parent = null;
 		private bool isNew = false;
 		private bool isModified = false;
-		private Midgard.Object midgardProperty = null;
+		private Midgard.Object[] midgardProperty = null;
 		private bool isMultiple = false;
 		private ValueArray values = null;
 		private string name = null;
 		private uint type = 0;		
 
 		public Property (Midgard2CR.Node parentNode, string name, Midgard.Object? midgardProperty) {
-			if (midgardProperty == null) {
-				this.midgardProperty = Midgard.Object.factory (((Midgard2CR.Session)parentNode.get_session ()).connection, "midgard_node_property", "");
-				this.midgardProperty.set ("name", name);
-				this.midgardProperty.set ("type", GICR.PropertyType.STRING); /* By default we set string type */
-			} else {
-				this.midgardProperty = midgardProperty;
-			}
+			this.midgardProperty[0] = midgardProperty;
 			this.name = name;
 			this.parent = parentNode;	
+		}
+
+		private Midgard.Object[] get_midgard_properties () {
+			if (this.midgardProperty == null) {
+			/* TODO, fetch properties from db */
+			}
+			if (this.midgardProperty == null) {
+				this.midgardProperty[0] = Midgard.Object.factory (((Midgard2CR.Session)this.parent.get_session ()).connection, "midgard_node_property", "");
+				this.midgardProperty[0].set ("name", name);
+				this.midgardProperty[0].set ("type", GICR.PropertyType.STRING); /* By default we set string type */
+			}
+			return this.midgardProperty;	
 		}
 
 		private ParamSpec get_property_spec () {
@@ -680,6 +686,29 @@ namespace Midgard2CR {
 		 */
 		public void remove () throws GICR.RepositoryException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.AccessDeniedException {
 			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+		}
+
+		private void internal_property_create () throws GICR.RepositoryException {
+			
+		}
+
+		private void internal_property_update () throws GICR.RepositoryException {
+			//if (this.get_midgard_property ().update() == false)
+			//	throw new GICR.RepositoryException.INTERNAL (this.parent.get_session ().connection.get_error_string ());
+		}
+
+		private void internal_property_save () throws GICR.RepositoryException {
+			if (this.is_new () == true)
+				internal_property_create ();
+			else 
+				internal_property_update ();
+	
+			this.isNew = false;
+			this.isModified = false;
+		}
+
+		public void save () throws GICR.AccessDeniedException, GICR.ItemExistsException, GICR.ConstraintViolationException, GICR.InvalidItemStateException, GICR.ReferentialIntegrityException, GICR.VersionException, GICR.LockException, GICR.NoSuchNodeTypeException, GICR.RepositoryException {
+			internal_property_save ();
 		}
 	}
 }

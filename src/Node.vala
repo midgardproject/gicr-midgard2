@@ -195,11 +195,15 @@ namespace Midgard2CR {
 			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
 		}
 
-		private void populate_properties () {
-			if (this.properties != null)
+		private void populate_properties (bool fromStorage) {
+			if (this.properties == null)
+				this.properties = new Gee.HashMap <string, Object>();
+			
+			if (fromStorage == false)
 				return;
 
-			this.properties = new Gee.HashMap <string, Object>();
+			if (this.properties != null)
+				return;
 
 			/* TODO, populate properties */
 		}
@@ -209,8 +213,8 @@ namespace Midgard2CR {
 		 */
 		public GICR.Property set_node_property (string name, Value? val, int? type) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException { 
 
-			/* Initialize properties sotre and populate available ones */
-			this.populate_properties ();
+			/* Initialize properties and populate available ones */
+			this.populate_properties (true);
 			/* Check if name is not a path */
 			if (Path.has_separator (name)) 
 				throw new GICR.ConstraintViolationException.INTERNAL ("Can not set property name with '/' separator");
@@ -239,10 +243,11 @@ namespace Midgard2CR {
 				property = new Property (this, name, null);		
 			}
 			property.set_value (val, type);
+			this.properties["name"] = (GLib.Object) property;
 		
 			/* We need property's flag to determine if property value has been changed.
 			 If not, we should not mark node as modified one */
-				this.isModified = true;
+			this.isModified = true;
 			
 			return (GICR.Property) property;
 		}
@@ -284,7 +289,7 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public GICR.Property get_node_property (string relPath) throws GICR.PathNotFoundException, GICR.InvalidArgumentException, GICR.RepositoryException { 
-			this.populate_properties ();
+			this.populate_properties (true);
 			
 			/* Check if relative path has been given.
 			 * If yes, get node and then this node's property */
@@ -315,11 +320,25 @@ namespace Midgard2CR {
 			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
 		}
 
+		private Property[] internal_get_properties (string[]? filter, bool fromStorage) throws GICR.RepositoryException {
+			/* TODO add filter support */
+			populate_properties (fromStorage);
+		
+			Property[] props = null;
+			if (this.properties == null || this.properties.size == 0)
+				return props;
+
+			foreach (GLib.Object p in this.properties.values) {
+				props += (Midgard2CR.Property) p;
+			}
+			return props;
+		}
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public GICR.Property[] get_properties (string[]? filter) throws GICR.RepositoryException { 
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+			return (GICR.Property[]) this.internal_get_properties (filter, true);
 		}
 
 		/**
@@ -608,9 +627,11 @@ namespace Midgard2CR {
 			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
 		}
 
-		private void internal_properties_save ()
-		{
-			/* TODO */	
+		private void internal_properties_save () throws GICR.RepositoryException {
+			Property[] props = internal_get_properties (null, false);
+			foreach (weak Property p in props) {
+				p.save ();
+			}	
 		}
 
 		private void internal_node_create () {
@@ -679,8 +700,7 @@ namespace Midgard2CR {
                 }
 
 		public void save () throws GICR.AccessDeniedException, GICR.ItemExistsException, GICR.ConstraintViolationException, GICR.InvalidItemStateException, GICR.ReferentialIntegrityException, GICR.VersionException, GICR.LockException, GICR.NoSuchNodeTypeException, GICR.RepositoryException {
-			this.internal_node_save ();
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+			this.internal_node_save ();	
 		}
 	}
 }
