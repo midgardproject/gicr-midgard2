@@ -48,11 +48,12 @@ namespace Midgard2CR {
 			this.session = session;
 			this.midgardNode = midgardNode;
 			var up_prop_value = 0;	
-			midgardNode.get ("parent", out up_prop_value);
 			if (parent == null) {
-				if (midgardNode != null 
-					&& (Midgard.is_guid (midgardNode.guid) && up_prop_value == 0)) {
-					this.isRoot = true;
+				if (midgardNode != null) { 
+					midgardNode.get ("parent", out up_prop_value);
+					if (Midgard.is_guid (midgardNode.guid) && up_prop_value == 0) {
+						this.isRoot = true;
+					}
 				}
 			}
 			this.parent = parent;
@@ -66,9 +67,74 @@ namespace Midgard2CR {
 			return this.contentObject;
 		}
 
+		/**
+		 * Get Midgard node.
+		 *
+		 * First try to fetch object from database. If this fails, initialize empty new one.
+		 * @return Midgard.Object of "midgard_node" type.
+		 */
+		public unowned Midgard.Object get_midgard_node () {
+			if (this.midgardNode == null) {
+				var up_id = 0;
+				if (this.parent != null) 
+					this.parent.midgardNode.get ("id", out up_id);
+				this.midgardNode = this.internal_get_midgard_node (
+					NameMapper.get_midgard_type_name (nodeType),
+					this.get_name (),
+					up_id);
+				if (this.midgardNode == null) {
+					this.midgardNode = Midgard.Object.factory (this.session.connection, "midgard_node", "");	
+					this.midgardNode.set (
+						"name", this.get_name (),
+						"typename", NameMapper.get_midgard_type_name (nodeType)
+					);
+				}
+			}
+			return this.midgardNode;
+		}
+
 		public string get_type_name () {
 			return this.nodeType;
 		}		
+
+		/*
+		 * On demand fetch midgard node from database, or initialize new object */
+		private unowned Midgard.Object? internal_get_midgard_node (string type, string name, uint up) {
+			var qst = new Midgard.QueryStorage ("midgard_node");
+                        var select = new Midgard.QuerySelect (this.session.connection, qst);
+                        select.toggle_read_only (false);
+			var group = new Midgard.QueryConstraintGroup ();
+			group.add_constraint (
+                                new Midgard.QueryConstraint (
+                                        new Midgard.QueryProperty ("typename", null),
+                                        "=",
+                                        Midgard.QueryValue.create_with_value (type),
+                                        null
+                                )
+                        );
+			group.add_constraint (
+                                new Midgard.QueryConstraint (
+                                        new Midgard.QueryProperty ("name", null),
+                                        "=",
+                                        Midgard.QueryValue.create_with_value (name),
+                                        null
+                                )
+                        );
+			group.add_constraint (
+                                new Midgard.QueryConstraint (
+                                        new Midgard.QueryProperty ("parent", null),
+                                        "=",
+                                        Midgard.QueryValue.create_with_value (up),
+                                        null
+                                )
+                        );
+			select.set_constraint (group);
+                        select.execute ();
+                        if (select.resultscount == 0)
+                                return null;
+                        var objects = select.list_objects ();
+                        return (Midgard.Object) objects[0];
+		}
 
 		private Node append_node (string name, string? primaryNodeTypeName) throws GICR.ItemExistsException, GICR.ConstraintViolationException, GICR.RepositoryException {
 			/* Check if node has children with given name. If yes, throw exception */
@@ -78,21 +144,14 @@ namespace Midgard2CR {
 
 			/* Handle empty NodeTypeName case */
 			var nodeType = primaryNodeTypeName;
-
-			/* Create Midgard node which will store node's data */
-			var midgardNode = Midgard.Object.factory (this.session.connection, "midgard_node", "");	
-			midgardNode.set (
-				"name", name,
-				"typename", NameMapper.get_midgard_type_name (nodeType)
-			);
-			
-			var newNode = new Node (this.session, midgardNode, this);
+		
+			var newNode = new Node (this.session, null, this);
 			newNode.isNew = true;
 			newNode.nodeType = nodeType;
 			/* FIXME, enable when implemented 
 			 * newNode.set_node_property ("jcr:primaryType", primaryNodeTypeName, PropertyType.NAME); */
 			newNode.isModified = true;
-			newNode.parent = this;
+			newNode.name = name;
 			
 			/* Set new node as a child of current one */
 			if (this.children == null)
@@ -121,7 +180,7 @@ namespace Midgard2CR {
 			/* Validate primary node type */
 
 			/* TODO */
-			/* Check if given property exists at the same path */
+			/* Check if property exists at the same path */
 
 			/* TODO, */
 			/* add nodes if there's a path with more than one element */
@@ -246,9 +305,7 @@ namespace Midgard2CR {
 				 * set it as valueto corresponding key */
 			}
 
-			return (GICR.Property) prop;
-
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+			return (GICR.Property) prop;	
 		}
 
 		/**
@@ -557,24 +614,32 @@ namespace Midgard2CR {
 		}
 
 		private void internal_node_create () {
+			/* Create midgard_node first, so we can catch duplicate quickly */			
+			if (this.parent != null) {
+				var parentNode = this.parent.get_midgard_node ();
+				uint propID;
+				parentNode.get ("id", out propID);
+
+				this.get_midgard_node ().set (
+					"parentguid", parentNode.guid,
+					"parent", propID
+				);
+				if (this.midgardNode.create () == false) {
+					/* We have duplicate so silently return and do not create content object */
+					if (this.session.connection.get_error () == Midgard.GenericError.DUPLICATE)
+						return;
+					throw new GICR.RepositoryException.INTERNAL (this.session.connection.get_error_string ());
+				}
+			}
+
 			if (this.get_content_object ().create () == true) {
+				/* If we crated content object, update midgard node and set correct reference guid 
+				 * and type name */
 				this.midgardNode.set (
 					"typename", this.contentObject.get_type ().name (),
 					"objectguid", this.contentObject.guid
 				);
-
-				if (this.parent == null)
-					return;		
-
-				var parentNode = this.parent.midgardNode;
-				uint propID;
-				parentNode.get ("id", out propID);
-
-				this.midgardNode.set (
-					"parentguid", parentNode.guid,
-					"parent", propID
-				);
-				this.midgardNode.create ();
+				this.midgardNode.update ();
 			} else {
 				throw new GICR.RepositoryException.INTERNAL (this.session.connection.get_error_string ());
 			}
