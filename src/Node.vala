@@ -21,7 +21,7 @@ namespace Midgard2CR {
 		private Midgard.Object midgardNode = null;
 		private Midgard.Object contentObject = null; 
 		private Midgard2CR.Session session = null;
-		private Node parent = null;
+		private unowned Node parent = null;
 		private bool isRoot = false;
 		private string name = null;
 		private Gee.HashMap <string, Object>children = null;
@@ -182,7 +182,7 @@ namespace Midgard2CR {
 		
 			/* We need property's flag to determine if property value has been changed.
 			 If not, we should not mark node as modified one */
-			this.isModified = true;
+				this.isModified = true;
 			
 			return (GICR.Property) property;
 		}
@@ -194,12 +194,23 @@ namespace Midgard2CR {
 			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
 		}
 
-		private void populate_children () {
-
+		private void populate_children () throws GICR.RepositoryException {
+			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
 		}
 
 		private Node[] internal_get_nodes (string[]? filter, bool fromStorage) throws GICR.RepositoryException {
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+			/* TODO filter */
+			if (fromStorage == true)
+				this.populate_children ();
+
+			if (this.children == null || this.children.size == 0)
+				return null;
+
+			Node[] nodes = null;
+			foreach (GLib.Object n in this.children.values) {
+				nodes += (Midgard2CR.Node) n;
+			}
+			return nodes;
 		}
 
 		/**
@@ -545,15 +556,21 @@ namespace Midgard2CR {
 		}
 
 		private void internal_node_create () {
-			if (this.get_content_object ().create () == false) {
+			if (this.get_content_object ().create () == true) {
 				this.midgardNode.set (
 					"typename", this.contentObject.get_type ().name (),
 					"objectguid", this.contentObject.guid
 				);
-			
+
+				if (this.parent == null)
+					return;		
+	
 				var parentNode = this.parent.midgardNode;
 				uint propID;
 				parentNode.get ("id", out propID);
+
+				stdout.printf ("STORE '%s' UNDER '%s' (%d) \n", this.get_name (), this.parent.get_name (),(int) propID);
+
 				this.midgardNode.set (
 					"parentguid", parentNode.guid,
 					"parent", propID
@@ -582,9 +599,7 @@ namespace Midgard2CR {
                         /* Create Midgad node and content object */
 			if (this.is_new () == true) 
 				this.internal_node_create ();
-
-			/* Update Modgard node and content object */
-			if (this.is_modified () == true)
+			else /* Update Modgard node and content object */
 				this.internal_node_update ();
 
 			this.isNew = false;
