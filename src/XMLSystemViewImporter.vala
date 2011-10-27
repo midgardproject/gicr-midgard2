@@ -118,10 +118,6 @@ namespace Midgard2CR {
 		}
 
 		public Midgard2CR.Node create_cr_node (Xml.Node *parentXmlNode, Midgard2CR.Node parentNode) throws GICR.ItemExistsException, GICR.PathNotFoundException, GICR.ConstraintViolationException, GICR.VersionException, GICR.LockException, GICR.InvalidArgumentException, GICR.RepositoryException, GICR.ValueFormatException {
-			stdout.printf ("Create new node '%s' ('%s') under '%s' \n", 
-				this.get_attribute_by_name (parentXmlNode, "name"),
-				get_nodetype (parentXmlNode),
-				parentNode.get_name ());
 			var newNode = (Midgard2CR.Node) parentNode.add_node (this.get_attribute_by_name (parentXmlNode, "name"), get_nodetype (parentXmlNode));
 			add_properties (parentXmlNode, newNode);
 			return newNode;
