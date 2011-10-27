@@ -45,24 +45,34 @@ namespace Midgard2CR {
 			return this.connection;
 		}
 
-		private void initialize_storage (Midgard.Config config, Midgard.Connection cnc) throws Error {
-
-			Midgard.Storage.create_base_storage (cnc);
-			
-			/* Create or update storage for every Midgard.DBObject derived type */
-			Type[] children = Type.from_name ("MidgardObject").children();
+		private void initialize_type_storage (Midgard.Connection cnc, Midgard.Config config, string typename) throws Error {
+			/* Create or update storage for every given and derived derived type */
+			Type[] children = Type.from_name (typename).children();
 			foreach (var t in children) {
 				/* Ignore abstract types and interfaces */
 				if (t.is_abstract()
-					|| t.is_interface())
+					|| t.is_interface()) {
+					initialize_type_storage (cnc, config, t.name ());
 					continue;
+				}
 				/* If TableCreate is true, create tables for all available types */
 				if (config.tablecreate == true)
 					Midgard.Storage.create (cnc, t.name());
 				/* If Tableupdate is true, update tables */
 				if (config.tableupdate == true)
-					Midgard.Storage.update (cnc, t.name());	
+					Midgard.Storage.update (cnc, t.name());
+	
+				/* Initialize storage for every derived type */
+				initialize_type_storage (cnc, config, t.name ());
 			}
+		} 
+
+		private void initialize_storage (Midgard.Config config, Midgard.Connection cnc) throws Error {
+
+			Midgard.Storage.create_base_storage (cnc);
+			
+			/* Create or update storage for every Midgard.DBObject derived type */
+			initialize_type_storage (cnc, config, "MidgardDBObject");
 
 			/* Try to get root node */
 			var rootNode = this.get_root_object (cnc);
