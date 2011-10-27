@@ -18,7 +18,7 @@ namespace Midgard2CR {
 
 	public class Node : GLib.Object, GICR.Item, GICR.Node {
 
-		private Midgard.Object midgardNode = null;
+		private unowned Midgard.Object midgardNode = null;
 		private Midgard.Object contentObject = null; 
 		private Midgard2CR.Session session = null;
 		private unowned Node parent = null;
@@ -92,6 +92,7 @@ namespace Midgard2CR {
 			/* FIXME, enable when implemented 
 			 * newNode.set_node_property ("jcr:primaryType", primaryNodeTypeName, PropertyType.NAME); */
 			newNode.isModified = true;
+			newNode.parent = this;
 			
 			/* Set new node as a child of current one */
 			if (this.children == null)
@@ -564,12 +565,10 @@ namespace Midgard2CR {
 
 				if (this.parent == null)
 					return;		
-	
+
 				var parentNode = this.parent.midgardNode;
 				uint propID;
 				parentNode.get ("id", out propID);
-
-				stdout.printf ("STORE '%s' UNDER '%s' (%d) \n", this.get_name (), this.parent.get_name (),(int) propID);
 
 				this.midgardNode.set (
 					"parentguid", parentNode.guid,
