@@ -98,14 +98,18 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public Item get_item (string absPath) throws RepositoryException, PathNotFoundException {
-			throw new RepositoryException.INTERNAL ("Not supported");
+			try {
+				return 	this.get_node (absPath);
+			} catch (PathNotFoundException e) {
+				return this.get_node_property (absPath);
+			}
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public GICR.Node get_node (string absPath) throws RepositoryException, PathNotFoundException {
-			var rNode = this.get_root_node ();
+			var rNode = this.get_root_node ();		
 			if (absPath == "/")
 				return rNode;
 			try {
