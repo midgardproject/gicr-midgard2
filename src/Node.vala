@@ -29,7 +29,7 @@ namespace Midgard2CR {
 		private bool isNew = true;
 		private bool isModified = false;
 		private bool toRemove = false;
-		private string nodeType = null;
+		private string nodeType = "nt:folder";
 
 		/**
 		 * Constructor
