@@ -20,6 +20,7 @@ void main () {
 	/* Import content from available xml file */
 	/* FIXME, Set correct ImportUUIDBehavior value */
 	session.import_xml ("/", Environment.get_current_dir () + "/import_example.xml", 0);
+	session.save ();
 
 	GICR.Node exampleNode = session.get_node ("/tests_general_base/idExample");
 	stdout.printf ("Found node at '%s' path \n", exampleNode.get_path ());
@@ -30,7 +31,7 @@ void main () {
 
 Repository get_repository () {
 
-	Log.set_always_fatal (GLib.LogLevelFlags.LEVEL_WARNING);
+	Log.set_always_fatal (GLib.LogLevelFlags.LEVEL_CRITICAL);
 
 	/* Read configuration file and pass it directly as repository configuration value */
 	string config_buffer;
