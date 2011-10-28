@@ -176,7 +176,7 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public void save () throws AccessDeniedException, ItemExistsException, ConstraintViolationException, InvalidItemStateException, ReferentialIntegrityException, VersionException, LockException, NoSuchNodeTypeException, RepositoryException {
+		public void save () throws GICR.AccessDeniedException, GICR.ItemExistsException, GICR.ConstraintViolationException, GICR.InvalidItemStateException, GICR.ReferentialIntegrityException, GICR.VersionException, GICR.LockException, GICR.NoSuchNodeTypeException, GICR.RepositoryException {
 			
 			/* TODO, remove nodes marked to be removed */
 
@@ -227,7 +227,6 @@ namespace Midgard2CR {
 		public void import_xml (string parentAbsPath, string uri, int uuidBehavior) throws RepositoryException, RuntimeException, PathNotFoundException, ItemExistsException, ConstraintViolationException, VersionException, InvalidSerializedDataException, LockException {
 			XMLImporter importer = XMLImporterFactory.create_importer_from_file (this, parentAbsPath, uuidBehavior, uri);
 			importer.execute ();
-			this.save (); 	
 		}
 
 		/**
