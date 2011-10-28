@@ -387,7 +387,7 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public void set_value (Value val, int type) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException, GICR.InvalidArgumentException {
+		public void set_value (Value val, int type) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException {
 			this.append_internal_value (val, type, false);
 		}
 
@@ -436,7 +436,7 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public void set_values (ValueArray values, int type) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException, GICR.InvalidArgumentException {
+		public void set_values (ValueArray values, int type) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException {
 			/* TODO, determine if this property may hold multiple values */
 			if (this.values != null && this.values.n_values > 0)
 				this.values = null;
