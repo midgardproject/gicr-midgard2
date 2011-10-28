@@ -689,7 +689,19 @@ namespace Midgard2CR {
 		}
 
 		private void internal_property_create () throws GICR.RepositoryException {
-			
+			Midgard.Object[] props = get_midgard_properties ();
+			foreach (Midgard.Object p in props) {
+				var parentID = 0;
+				this.parent.get_content_object ().get ("id", out parentID);
+				p.set (
+					"parent", parentID, 
+					"parentguid", this.parent.get_content_object ().guid,
+					"type", this.type, 
+					"value", this.type == GICR.PropertyType.BINARY ? "" : this.get_string ()
+				);
+				p.create ();
+				/* TODO ,create attachment in case of binary property */
+			} 	
 		}
 
 		private void internal_property_update () throws GICR.RepositoryException {
