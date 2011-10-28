@@ -226,7 +226,13 @@ namespace Midgard2CR {
 		 */
 		public void import_xml (string parentAbsPath, string uri, int uuidBehavior) throws RepositoryException, RuntimeException, PathNotFoundException, ItemExistsException, ConstraintViolationException, VersionException, InvalidSerializedDataException, LockException {
 			XMLImporter importer = XMLImporterFactory.create_importer_from_file (this, parentAbsPath, uuidBehavior, uri);
-			importer.execute ();
+			try {
+				importer.execute ();
+			} catch (GICR.ValueFormatException e) {
+				throw new GICR.RepositoryException.INTERNAL (e.message);
+			} catch (GICR.InvalidArgumentException e) {
+				throw new GICR.RepositoryException.INTERNAL (e.message);
+			}
 		}
 
 		/**
