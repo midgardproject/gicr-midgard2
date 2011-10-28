@@ -333,7 +333,7 @@ namespace Midgard2CR {
 			this.parent = parentNode;	
 		}
 
-		private Midgard.Object[] get_midgard_properties () {
+		private Midgard.Object[] get_midgard_properties () throws GICR.RepositoryException {
 			if (this.midgardProperty == null) {
 			/* TODO, fetch properties from db */
 			}
@@ -345,7 +345,7 @@ namespace Midgard2CR {
 			return this.midgardProperty;	
 		}
 
-		private ParamSpec get_property_spec () {
+		private ParamSpec get_property_spec () throws GICR.RepositoryException {
 			Type klassType = Type.from_name (NameMapper.get_midgard_type_name (this.parent.get_type_name ()));
 			return ((ObjectClass) klassType.class_peek ()).
 				find_property (NameMapper.get_midgard_property_name (this.get_name ()));
@@ -371,7 +371,7 @@ namespace Midgard2CR {
 			this.values.append (val);
 		}
 
-		private unowned ValueArray get_internal_values () {
+		private unowned ValueArray get_internal_values () throws GICR.RepositoryException {
 			if (this.values == null)
 				this.values = new ValueArray (1);
 			var pspec = this.get_property_spec ();
@@ -391,7 +391,7 @@ namespace Midgard2CR {
 			this.append_internal_value (val, type, false);
 		}
 
-		private void append_internal_value (Value val, int type, bool append) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException, GICR.InvalidArgumentException {
+		private void append_internal_value (Value val, int type, bool append) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException, GICR.InvalidArgumentException, GICR.PathNotFoundException {
 
 			/* Validate value - ValueFormatException */
 			/* TODO, this.validateValue (val, type); */
@@ -490,7 +490,7 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public GLib.DataInputStream get_binary () throws GICR.RepositoryException {
+		public GLib.DataInputStream get_binary () throws GICR.ValueFormatException, GICR.RepositoryException {
 			if (this.is_multiple () == true)
 				throw new GICR.ValueFormatException.INTERNAL ("Can not get value of multi valued property");
 			GLib.InputStream inputStream = new MemoryInputStream.from_data (this.values.values[0].get_string ().data, GLib.g_free);
