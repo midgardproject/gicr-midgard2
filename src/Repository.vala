@@ -11,9 +11,13 @@ namespace Midgard2CR {
 
 		private Midgard.Connection connection = null;
 
-		public Repository (Gee.HashMap? parameters) throws Error {
+		public Repository (Gee.HashMap? parameters) {
 			GLib.Object ();
-			this.connection = this.midgard2_connect (parameters);
+			try {
+				this.connection = this.midgard2_connect (parameters);
+			} catch (Error e) {
+				critical ("Coudn't initialize repository. '%s'", e.message);
+			}
 		}
 
 		private Midgard.Connection midgard2_connect (Gee.HashMap <string, string>parameters) throws Error {
