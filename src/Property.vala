@@ -644,8 +644,8 @@ namespace Midgard2CR {
 		 */
 		public GICR.Session get_session () throws GICR.RepositoryException {
 			if (this.session == null)
-				this.session = this.parent.get_session ();
-			return this.session;
+				this.session = (Midgard2CR.Session) this.parent.get_session ();
+			return (GICR.Session) this.session;
 		}
 
 		/**
