@@ -338,7 +338,7 @@ namespace Midgard2CR {
 			/* TODO, fetch properties from db */
 			}
 			if (this.midgardProperty == null) {
-				this.midgardProperty[0] = Midgard.Object.factory (((Midgard2CR.Session)this.parent.get_session ()).connection, "midgard_node_property", "");
+				this.midgardProperty[0] = Midgard.Object.factory (((Midgard2CR.Session)this.get_session ()).connection, "midgard_node_property", "");
 				this.midgardProperty[0].set ("name", name);
 				this.midgardProperty[0].set ("type", GICR.PropertyType.STRING); /* By default we set string type */
 			}
@@ -643,7 +643,9 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public GICR.Session get_session () throws GICR.RepositoryException {
-			return this.parent.get_session ();
+			if (this.session == null)
+				this.session = this.parent.get_session ();
+			return this.session;
 		}
 
 		/**
@@ -706,7 +708,7 @@ namespace Midgard2CR {
 
 		private void internal_property_update () throws GICR.RepositoryException {
 			//if (this.get_midgard_property ().update() == false)
-			//	throw new GICR.RepositoryException.INTERNAL (this.parent.get_session ().connection.get_error_string ());
+			//	throw new GICR.RepositoryException.INTERNAL (this.get_session ().connection.get_error_string ());
 		}
 
 		private void internal_property_save () throws GICR.RepositoryException {
