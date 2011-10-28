@@ -351,7 +351,7 @@ namespace Midgard2CR {
 				find_property (NameMapper.get_midgard_property_name (this.get_name ()));
 		}
 
-		private void set_internal_values (Value val, bool append) {
+		private void set_internal_values (Value val, bool append) throws GICR.RepositoryException {
 			if (this.get_property_spec () != null) {
 	
 				this.parent.get_content_object ().set_property (
@@ -391,7 +391,7 @@ namespace Midgard2CR {
 			this.append_internal_value (val, type, false);
 		}
 
-		private void append_internal_value (Value val, int type, bool append) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException, GICR.InvalidArgumentException, GICR.PathNotFoundException {
+		private void append_internal_value (Value val, int type, bool append) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException {
 
 			/* Validate value - ValueFormatException */
 			/* TODO, this.validateValue (val, type); */
@@ -414,7 +414,11 @@ namespace Midgard2CR {
 					if (type == 0) {
 						propertyType = GICR.PropertyType.REFERENCE;
 					}
-					newValue.set_string (((GICR.Node)valueObject).get_node_property ("jcr:uuid").get_string());
+					try {
+						newValue.set_string (((GICR.Node)valueObject).get_node_property ("jcr:uuid").get_string());
+					} catch (GICR.PathNotFoundException e) {
+						throw new GICR.RepositoryException.INTERNAL (e.message);
+					}
 				}
 				/* Value is a Property */
 				if (valueObject is GICR.Property) {
@@ -695,12 +699,16 @@ namespace Midgard2CR {
 			foreach (Midgard.Object p in props) {
 				var parentID = 0;
 				this.parent.get_content_object ().get ("id", out parentID);
-				p.set (
-					"parent", parentID, 
-					"parentguid", this.parent.get_content_object ().guid,
-					"type", this.type, 
-					"value", this.type == GICR.PropertyType.BINARY ? "" : this.get_string ()
-				);
+				try {
+					p.set (
+						"parent", parentID, 
+						"parentguid", this.parent.get_content_object ().guid,
+						"type", this.type, 
+						"value", this.type == GICR.PropertyType.BINARY ? "" : this.get_string ()
+					);
+				} catch (GICR.ValueFormatException e) {
+					throw new GICR.RepositoryException.INTERNAL (e.message);
+				}
 				p.create ();
 				/* TODO ,create attachment in case of binary property */
 			} 	
