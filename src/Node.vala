@@ -247,7 +247,7 @@ namespace Midgard2CR {
 				property = new Property (this, name, null);		
 			}
 			property.set_value (val, type);
-			this.properties["name"] = (GLib.Object) property;
+			this.properties[name] = (GLib.Object) property;
 		
 			/* We need property's flag to determine if property value has been changed.
 			 If not, we should not mark node as modified one */
