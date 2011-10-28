@@ -73,7 +73,7 @@ namespace Midgard2CR {
 		 * First try to fetch object from database. If this fails, initialize empty new one.
 		 * @return Midgard.Object of "midgard_node" type.
 		 */
-		public unowned Midgard.Object get_midgard_node () {
+		public unowned Midgard.Object get_midgard_node () throws GICR.RepositoryException {
 			if (this.midgardNode == null) {
 				var up_id = 0;
 				if (this.parent != null) 
@@ -99,7 +99,7 @@ namespace Midgard2CR {
 
 		/*
 		 * On demand fetch midgard node from database, or initialize new object */
-		private unowned Midgard.Object? internal_get_midgard_node (string type, string name, uint up) {
+		private unowned Midgard.Object? internal_get_midgard_node (string type, string name, uint up) throws GICR.RepositoryException {
 			var qst = new Midgard.QueryStorage ("midgard_node");
                         var select = new Midgard.QuerySelect (this.session.connection, qst);
                         select.toggle_read_only (false);
@@ -129,7 +129,11 @@ namespace Midgard2CR {
                                 )
                         );
 			select.set_constraint (group);
-                        select.execute ();
+			try {
+                        	select.execute ();
+			} catch (Error e) {
+				throw new GICR.RepositoryException.INTERNAL (e.message);
+			}
                         if (select.resultscount == 0)
                                 return null;
                         var objects = select.list_objects ();
@@ -263,7 +267,7 @@ namespace Midgard2CR {
 			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
 		}
 
-		private Node[] internal_get_nodes (string[]? filter, bool fromStorage) throws GICR.RepositoryException {
+		private Node[]? internal_get_nodes (string[]? filter, bool fromStorage) throws GICR.RepositoryException {
 			/* TODO filter */
 			if (fromStorage == true)
 				this.populate_children ();
@@ -288,7 +292,7 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public GICR.Property get_node_property (string relPath) throws GICR.PathNotFoundException, GICR.InvalidArgumentException, GICR.RepositoryException { 
+		public GICR.Property get_node_property (string relPath) throws GICR.PathNotFoundException, GICR.RepositoryException { 
 			this.populate_properties (true);
 			
 			/* Check if relative path has been given.
@@ -627,14 +631,14 @@ namespace Midgard2CR {
 			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
 		}
 
-		private void internal_properties_save () throws GICR.RepositoryException {
+		private void internal_properties_save () throws GICR.AccessDeniedException, GICR.ItemExistsException, GICR.ConstraintViolationException, GICR.InvalidItemStateException, GICR.ReferentialIntegrityException, GICR.VersionException, GICR.LockException, GICR.NoSuchNodeTypeException, GICR.RepositoryException {
 			Property[] props = internal_get_properties (null, false);
 			foreach (weak Property p in props) {
 				p.save ();
 			}	
 		}
 
-		private void internal_node_create () {
+		private void internal_node_create () throws GICR.RepositoryException {
 			/* Create midgard_node first, so we can catch duplicate quickly */			
 			if (this.parent != null) {
 				var parentNode = this.parent.get_midgard_node ();
@@ -666,7 +670,7 @@ namespace Midgard2CR {
 			}
 		}
 
-		private void internal_node_update () {
+		private void internal_node_update () throws GICR.RepositoryException {
 			if (this.midgardNode.update () == true) 
 				this.contentObject.update ();
 
@@ -674,7 +678,7 @@ namespace Midgard2CR {
 				throw new GICR.RepositoryException.INTERNAL (this.session.connection.get_error_string ());
 		}
 
-		private void internal_node_save () {
+		private void internal_node_save () throws GICR.AccessDeniedException, GICR.ItemExistsException, GICR.ConstraintViolationException, GICR.InvalidItemStateException, GICR.ReferentialIntegrityException, GICR.VersionException, GICR.LockException, GICR.NoSuchNodeTypeException, GICR.RepositoryException {
 			/* Remove node if flag indicates this */
 			if (this.toRemove == true) {
 				this.remove ();	
