@@ -33,8 +33,12 @@ namespace Midgard2CR {
 
 			/* Create document from given file path */
 			string xmlData;
-			FileUtils.get_contents (filePath, out xmlData);
-			return create_importer_from_data (session, parentNodePath, uuidB, xmlData);
+			try {
+				FileUtils.get_contents (filePath, out xmlData);
+				return create_importer_from_data (session, parentNodePath, uuidB, xmlData);
+			} catch (GLib.FileError e) {
+				throw new GICR.RepositoryException.INTERNAL (e.message);
+			}
 	        }
 		
 		private static XMLImporter create_importer (GICR.Session session, string path, int uuidB, Xml.Doc* doc) throws GICR.RepositoryException {
