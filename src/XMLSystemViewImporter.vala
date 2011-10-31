@@ -61,6 +61,16 @@ namespace Midgard2CR {
 			return "";
 		}
 
+		private string[]? get_property_values (Xml.Node *node) {
+			string[] values = null;
+			for (Xml.Node* iter = node->children; iter != null; iter = iter->next) {
+				if (iter->type != Xml.ElementType.ELEMENT_NODE) 
+					continue;	
+				values += iter->children->content;
+			}
+			return values;
+		}
+
 		private string get_nodetype (Xml.Node *node) {
 			for (Xml.Node* iter = node->children; iter != null; iter = iter->next) {
 				if (iter->type != Xml.ElementType.ELEMENT_NODE) 
@@ -103,17 +113,19 @@ namespace Midgard2CR {
 				/* Ignore primary type property */
 				if (get_attribute_by_name (iter, "name") == "jcr:primaryType")
 					continue;
-				stdout.printf ("Set '%s' property of '%s' type (%s) \n", 
-					get_attribute_by_name (iter, "name"),                          
-					get_attribute_by_name (iter, "type"), 
-                                        get_property_value (iter)
-                                );
- 
-				crNode.set_node_property (
-					get_attribute_by_name (iter, "name"),
-					get_property_value (iter),
-					(int) GICR.PropertyType.value_from_name (get_attribute_by_name (iter, "type"))
-				);
+
+				/* Get all values and create multiple property, if there are more values */
+				uint i = 0;
+				string pName = get_attribute_by_name (iter, "name");
+				foreach (string sv in get_property_values (iter)) { 
+					crNode.set_node_property (
+						pName,
+						sv,
+						(int) GICR.PropertyType.value_from_name (get_attribute_by_name (iter, "type"))
+					);
+					i++;
+				}
+				if (i > 1) ((Midgard2CR.Property)crNode.get_node_property (pName)).set_multiple_flag (true);
 			}
 		}
 

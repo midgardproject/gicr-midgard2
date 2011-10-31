@@ -319,7 +319,7 @@ namespace Midgard2CR {
 		/* Private members */
 		private Midgard2CR.Session session = null;
 		private Midgard2CR.Node parent = null;
-		private bool isNew = false;
+		private bool isNew = true;
 		private bool isModified = false;
 		private Midgard.Object[] midgardProperty = null;
 		private bool isMultiple = false;
@@ -328,7 +328,11 @@ namespace Midgard2CR {
 		private uint type = 0;		
 
 		public Property (Midgard2CR.Node parentNode, string name, Midgard.Object? midgardProperty) {
-			this.midgardProperty[0] = midgardProperty;
+			if (midgardProperty != null) {
+				this.midgardProperty[0] = midgardProperty;
+				if (Midgard.is_guid (midgardProperty.guid) == false)
+					this.isNew = true;
+			}
 			this.name = name;
 			this.parent = parentNode;	
 		}
@@ -336,11 +340,13 @@ namespace Midgard2CR {
 		private Midgard.Object[] get_midgard_properties () throws GICR.RepositoryException {
 			if (this.midgardProperty == null) {
 			/* TODO, fetch properties from db */
+				//this.isNew = false;
 			}
 			if (this.midgardProperty == null) {
-				this.midgardProperty[0] = Midgard.Object.factory (((Midgard2CR.Session)this.get_session ()).connection, "midgard_node_property", "");
+				this.midgardProperty += Midgard.Object.factory (((Midgard2CR.Session)this.get_session ()).connection, "midgard_node_property", "");
 				this.midgardProperty[0].set ("name", name);
 				this.midgardProperty[0].set ("type", GICR.PropertyType.STRING); /* By default we set string type */
+				this.isNew = true;
 			}
 			return this.midgardProperty;	
 		}
@@ -364,11 +370,11 @@ namespace Midgard2CR {
 			if (this.values == null)
 				this.values = new ValueArray (0);			
 
-			if (append == false) {
-				if (this.values.n_values > 0)
-					this.values.get_nth (0).unset ();
-			}
-			this.values.append (val);
+			/* In case of multivalue property append one */
+			if (append == false) 
+				this.values.insert (0, val);
+			else 
+				this.values.append (val);
 		}
 
 		private unowned ValueArray get_internal_values () throws GICR.RepositoryException {
@@ -378,7 +384,7 @@ namespace Midgard2CR {
 			if (pspec != null) {
 				Value val = {};
 				val.init (pspec.value_type);
-				this.parent.get_content_object ().get (this.get_name (), ref val);
+				this.parent.get_content_object ().get_property (NameMapper.get_midgard_property_name (this.get_name ()), ref val);
 				this.values.append (val);
 			}
 			return this.values;	
@@ -388,7 +394,8 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public void set_value (Value val, int type) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException {
-			this.append_internal_value (val, type, false);
+			this.append_internal_value (val, type, this.is_multiple ());
+			this.isModified = true;
 		}
 
 		private void append_internal_value (Value val, int type, bool append) throws GICR.ValueFormatException, GICR.VersionException, GICR.LockException, GICR.ConstraintViolationException, GICR.RepositoryException {
@@ -460,9 +467,10 @@ namespace Midgard2CR {
 		public Value get_value () throws GICR.ValueFormatException, GICR.RepositoryException {
 			if (this.is_multiple () == true)
 				throw new GICR.ValueFormatException.INTERNAL ("Can not get single value of multi valued property");
-			
-			if (this.values != null)
-				return this.values.values[0];
+		
+			unowned ValueArray values = get_internal_values ();	
+			if (values != null)
+				return values.values[0];
 
 			throw new GICR.RepositoryException.INTERNAL ("Can not access value. Holder not initialized");
 		}
@@ -477,7 +485,7 @@ namespace Midgard2CR {
 			if (this.values != null)
 				return this.values.copy ();
 
-			throw new GICR.RepositoryException.INTERNAL ("Can not access value. Holder not initialized");	
+			throw new GICR.RepositoryException.INTERNAL ("Can not access values. Holder not initialized");	
 		}
 
 
@@ -488,7 +496,10 @@ namespace Midgard2CR {
 			if (this.is_multiple () == true)
 				throw new GICR.ValueFormatException.INTERNAL ("Can not get value of multi valued property");	
 			var val = this.get_value ();
-			return val.get_string ();
+			Value strval = {};
+			strval.init (typeof (string));
+			val.transform (ref strval);
+			return strval.get_string ();
 		}
 
 		/**
@@ -696,6 +707,9 @@ namespace Midgard2CR {
 
 		private void internal_property_create () throws GICR.RepositoryException {
 			Midgard.Object[] props = get_midgard_properties ();
+			if (props == null)
+				return;
+			stdout.printf ("SAVE midgard_property '%s' \n", this.get_name ());
 			foreach (Midgard.Object p in props) {
 				var parentID = 0;
 				this.parent.get_content_object ().get ("id", out parentID);
@@ -731,6 +745,10 @@ namespace Midgard2CR {
 
 		public void save () throws GICR.AccessDeniedException, GICR.ItemExistsException, GICR.ConstraintViolationException, GICR.InvalidItemStateException, GICR.ReferentialIntegrityException, GICR.VersionException, GICR.LockException, GICR.NoSuchNodeTypeException, GICR.RepositoryException {
 			internal_property_save ();
+		}
+
+		public void set_multiple_flag (bool flag) {
+			this.isMultiple = flag;
 		}
 	}
 }
