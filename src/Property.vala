@@ -337,15 +337,30 @@ namespace Midgard2CR {
 			this.parent = parentNode;	
 		}
 
-		private Midgard.Object[] get_midgard_properties () throws GICR.RepositoryException {
+		private Midgard.Object[]? get_midgard_properties () throws GICR.RepositoryException {
 			if (this.midgardProperty == null) {
 			/* TODO, fetch properties from db */
 				//this.isNew = false;
 			}
-			if (this.midgardProperty == null) {
-				this.midgardProperty += Midgard.Object.factory (((Midgard2CR.Session)this.get_session ()).connection, "midgard_node_property", "");
-				this.midgardProperty[0].set ("name", name);
-				this.midgardProperty[0].set ("type", GICR.PropertyType.STRING); /* By default we set string type */
+			if (this.midgardProperty != null) 
+				return this.midgardProperty;
+
+			if (this.values == null)
+				return null;				
+
+			foreach (Value v in this.values) {
+				Midgard.Object prop = Midgard.Object.factory (
+					((Midgard2CR.Session)this.get_session ()).connection, 
+					"midgard_node_property", ""
+				);
+				Value strv = Value (typeof(string));
+				v.transform (ref strv);
+				prop.set (
+					"title", name,
+					"type", this.type == 0 ? GICR.PropertyType.STRING : this.type,
+					"value", strv.get_string ()
+				);
+				this.midgardProperty += prop;	
 				this.isNew = true;
 			}
 			return this.midgardProperty;	
@@ -709,20 +724,14 @@ namespace Midgard2CR {
 			Midgard.Object[] props = get_midgard_properties ();
 			if (props == null)
 				return;
-			stdout.printf ("SAVE midgard_property '%s' \n", this.get_name ());
-			foreach (Midgard.Object p in props) {
+					foreach (Midgard.Object p in props) {
 				var parentID = 0;
 				this.parent.get_content_object ().get ("id", out parentID);
-				try {
-					p.set (
-						"parent", parentID, 
-						"parentguid", this.parent.get_content_object ().guid,
-						"type", this.type, 
-						"value", this.type == GICR.PropertyType.BINARY ? "" : this.get_string ()
-					);
-				} catch (GICR.ValueFormatException e) {
-					throw new GICR.RepositoryException.INTERNAL (e.message);
-				}
+				p.set (
+					"parent", parentID, 
+					"parentguid", this.parent.get_content_object ().guid,
+					"type", this.type	
+				);
 				p.create ();
 				/* TODO ,create attachment in case of binary property */
 			} 	
