@@ -22,8 +22,15 @@ void main () {
 	session.import_xml ("/", Environment.get_current_dir () + "/import_example.xml", 0);
 	session.save ();
 
-	GICR.Node exampleNode = session.get_node ("/tests_general_base/idExample");
-	stdout.printf ("Found node at '%s' path \n", exampleNode.get_path ());
+	/* Create new read only session */
+	stdout.printf ("Get new read only session \n");
+	Session readSession = repository.login (null, null);
+	GICR.Node exampleNode = readSession.get_node ("/tests_general_base/idExample");
+	stdout.printf ("Found node '%s' at '%s' path \n", exampleNode.get_name (), exampleNode.get_path ());
+	stdout.printf ("Node type '%s' created at '%s' \n", 
+		exampleNode.get_property_value ("jcr:primaryType", GICR.PropertyType.STRING).get_string (), 
+		exampleNode.get_property_value ("jcr:created", PropertyType.STRING).get_string ()
+	);
 }
 
 
