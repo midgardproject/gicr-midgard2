@@ -182,8 +182,6 @@ namespace Midgard2CR {
 
 			Node rootNode = (Midgard2CR.Node) this.get_root_node ();
 			rootNode.save ();
-			
-			throw new RepositoryException.INTERNAL ("Not supported");
 		}
 
 		/**
