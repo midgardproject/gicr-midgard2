@@ -28,8 +28,8 @@ void main () {
 	GICR.Node exampleNode = readSession.get_node ("/tests_general_base/idExample");
 	stdout.printf ("Found node '%s' at '%s' path \n", exampleNode.get_name (), exampleNode.get_path ());
 	stdout.printf ("Node type '%s' created at '%s' \n", 
-		exampleNode.get_property_value ("jcr:primaryType", GICR.PropertyType.STRING).get_string (), 
-		exampleNode.get_property_value ("jcr:created", PropertyType.STRING).get_string ()
+		exampleNode.get_node_property ("jcr:primaryType").get_string (), 
+		exampleNode.get_node_property ("jcr:created").get_string ()
 	);
 }
 
