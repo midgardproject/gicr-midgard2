@@ -329,7 +329,7 @@ namespace Midgard2CR {
 
 		public Property (Midgard2CR.Node parentNode, string name, Midgard.Object? midgardProperty) {
 			if (midgardProperty != null) {
-				this.midgardProperty[0] = midgardProperty;
+				this.midgardProperty += (Midgard.Object) midgardProperty.ref ();
 				if (Midgard.is_guid (midgardProperty.guid) == false)
 					this.isNew = true;
 			}
