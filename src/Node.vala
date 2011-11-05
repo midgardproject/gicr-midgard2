@@ -21,7 +21,7 @@ namespace Midgard2CR {
 		private unowned Midgard.Object midgardNode = null;
 		private Midgard.Object contentObject = null; 
 		private Midgard2CR.Session session = null;
-		private unowned Node parent = null;
+		private Node parent = null;
 		private bool isRoot = false;
 		private string name = null;
 		private Gee.HashMap <string, Object>children = null;
@@ -259,12 +259,71 @@ namespace Midgard2CR {
 		/**
 		 * {@inheritDoc}
 		 */
-		public GICR.Node get_node (string relPath) throws GICR.PathNotFoundException, GICR.InvalidArgumentException, GICR.RepositoryException { 
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+		public GICR.Node get_node (string relPath) throws GICR.PathNotFoundException, GICR.InvalidArgumentException, GICR.RepositoryException {
+			if (Path.is_absolute (relPath)) 
+				throw new GICR.RepositoryException.INTERNAL ("Expected relative path. Absolute '%s' given", relPath);
+			populate_children ();
+			string name = relPath.substring (0, relPath.index_of("/", 1)); 
+			string remain = null;
+			if ("/" in relPath)
+				remain = relPath.substring (relPath.index_of("/", name.length)+1, -1);
+
+			var child = this.children[name];
+			if (child == null)
+				throw new GICR.PathNotFoundException.INTERNAL ("Node at path '%s' not found", relPath);
+
+			var childNode = new Node (this.session, (Midgard.Object) child, this);
+
+			if (remain != null) 
+				return childNode.get_node (remain);
+
+			return childNode; 
 		}
 
 		private void populate_children () throws GICR.RepositoryException {
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+			/* Nothing to populate */
+			if (this.children != null)
+				return;
+
+			/* This is initial, not yet stored node. Ignore. */
+			if (Midgard.is_guid (this.get_midgard_node ().guid) == false)
+				return;
+
+			var propID = 0;
+			this.get_midgard_node ().get ("id", out propID);
+
+			if (propID == 0) {
+				/* TODO, throw exception */
+			}
+
+			/* Query midgard_node and get children objects */
+                        var qst = new Midgard.QueryStorage ("midgard_node");
+                        var select = new Midgard.QuerySelect (this.session.connection, qst);
+                        select.toggle_read_only (false);
+                        select.set_constraint (
+                                new Midgard.QueryConstraint (
+                                        new Midgard.QueryProperty ("parent", null),
+                                        "=",
+                                        Midgard.QueryValue.create_with_value (propID),
+                                        null
+                                )
+                        );
+                        select.execute ();
+			/* No children. Ignore. */
+                        if (select.resultscount == 0)
+                                return;
+
+			/* Initialize children hash */
+			this.children = new Gee.HashMap<string, GLib.Object> ();
+
+                        Midgard.Object[] children = (Midgard.Object[]) select.list_objects ();
+
+			foreach (weak Midgard.Object o in children) {
+				string name;
+				o.get ("name", out name);
+				this.children[name] = (GLib.Object) o;
+			}
+			return;
 		}
 
 		private Node[]? internal_get_nodes (string[]? filter, bool fromStorage) throws GICR.RepositoryException {
@@ -542,11 +601,15 @@ namespace Midgard2CR {
 				return "/";
 
 			/* Parent node is root, append to path instance name only */
-			if (this.parent == null || this.parent.isRoot == true)
+			if (this.parent == null)
 				return "/" + this.get_name ();
 
 			/* Chain up and build full path till root node is found */
-			return this.parent.get_path () + "/" + this.get_name ();
+			var path = this.parent.get_path () + "/" + this.get_name ();
+			if (path[0] == '/' && path[1] == '/')
+				return path.substring (1, -1);
+			else 
+				return path;
 		}
 
 		/**
