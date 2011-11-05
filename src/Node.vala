@@ -199,17 +199,55 @@ namespace Midgard2CR {
 			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
 		}
 
-		private void populate_properties (bool fromStorage) {
+		private void initialize_properties () {
 			if (this.properties == null)
 				this.properties = new Gee.HashMap <string, Object>();
-			
+		}
+
+		private void populate_properties (bool fromStorage) {		
+			initialize_properties ();	
 			if (fromStorage == false)
 				return;
 
 			if (this.properties != null)
 				return;
 
-			/* TODO, populate properties */
+			/* This is initial, not yet stored node. Ignore. */
+			if (Midgard.is_guid (this.get_midgard_node ().guid) == false)
+				return;
+
+			var propID = 0;
+			this.get_midgard_node ().get ("id", out propID);
+
+			if (propID == 0) {
+				/* TODO, throw exception */
+			}
+
+			/* Query midgard_node_property and get properties */
+                        var qst = new Midgard.QueryStorage ("midgard_node_property");
+                        var select = new Midgard.QuerySelect (this.session.connection, qst);
+                        select.toggle_read_only (false);
+                        select.set_constraint (
+                                new Midgard.QueryConstraint (
+                                        new Midgard.QueryProperty ("parent", null),
+                                        "=",
+                                        Midgard.QueryValue.create_with_value (propID),
+                                        null
+                                )
+                        );
+                        select.execute ();
+			/* No properties. Ignore. */
+                        if (select.resultscount == 0)
+                                return;
+
+                        Midgard.Object[] props = (Midgard.Object[]) select.list_objects ();
+
+			foreach (Midgard.Object o in props) {
+				string title;
+				o.get ("title", out title);
+				this.properties[title] = (GLib.Object) new Property (this, title, o);
+			}
+			return;
 		}
 
 		/**
@@ -352,6 +390,20 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public GICR.Property get_node_property (string relPath) throws GICR.PathNotFoundException, GICR.RepositoryException { 
+			
+			initialize_properties ();
+			/* Try content object's property first */
+			if (Path.has_separator (relPath) == false) {
+				Midgard.Object contentObject = this.get_content_object ();
+				var midgardName = NameMapper.get_midgard_property_name (relPath);
+				GLib.ParamSpec pspec = contentObject.get_class ().find_property (midgardName);
+				if (pspec != null && Path.has_separator (relPath) == false) {
+					if (this.properties.has_key (relPath) == false)
+						this.properties[relPath] = (GLib.Object) new Property (this, relPath, null);
+					return (Property) this.properties[relPath];
+				}			
+			}
+
 			this.populate_properties (true);
 			
 			/* Check if relative path has been given.
@@ -380,7 +432,9 @@ namespace Midgard2CR {
 		 * {@inheritDoc}
 		 */
 		public Value get_property_value (string name, int? type) throws GICR.PathNotFoundException, GICR.ValueFormatException, GICR.RepositoryException { 
-			throw new GICR.RepositoryException.INTERNAL ("Not Supported");
+			GICR.Property prop = get_node_property (name);
+			/* TODO convert type */
+			return prop.get_value ();
 		}
 
 		private Property[] internal_get_properties (string[]? filter, bool fromStorage) throws GICR.RepositoryException {
