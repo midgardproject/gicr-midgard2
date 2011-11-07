@@ -57,13 +57,37 @@ namespace Midgard2CR {
 				}
 			}
 			this.parent = parent;
+			
+			/* Set Node type */
+			if (midgardNode != null) {
+				string typeName = null;
+				midgardNode.get ("typename", out typeName);
+				if (typeName != null && typeName != "") {
+					this.nodeType = typeName;
+				}
+			}
 		}
 
 		public Midgard.Object get_content_object () {
-			if (this.contentObject == null)
+			string typeName = null;
+			this.get_midgard_node ().get ("typename", out typeName);
+			if (this.contentObject == null) {
+				if (Midgard.is_guid (this.get_midgard_node ().guid)) {
+					string refGuid = null;
+					this.get_midgard_node ().get ("objectguid", out refGuid);		
+					this.contentObject = Midgard.Object.factory (this.session.connection,
+                                        	NameMapper.get_midgard_type_name (this.nodeType),
+                                        	refGuid
+                                	);	
+				}
+			}
+			if (this.contentObject == null) {
 				this.contentObject = Midgard.Object.factory (this.session.connection, 
 					NameMapper.get_midgard_type_name (this.nodeType),
-					"" );
+					""
+				);
+			}
+			this.contentObject.set ("jcr-primaryType", typeName);
 			return this.contentObject;
 		}
 
@@ -774,7 +798,9 @@ namespace Midgard2CR {
 				}
 			}
 
-			if (this.get_content_object ().create () == true) {
+			var contentObj = this.get_content_object ();
+			contentObj.set ("jcr-primaryType", this.nodeType);
+			if (contentObj.create () == true) {
 				/* If we crated content object, update midgard node and set correct reference guid 
 				 * and type name */
 				this.midgardNode.set (
