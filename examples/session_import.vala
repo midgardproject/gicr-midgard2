@@ -25,7 +25,11 @@ void main () {
 	/* Create new read only session */
 	stdout.printf ("Get new read only session \n");
 	Session readSession = repository.login (null, null);
+	
+	/* Get stored node by its path */
 	GICR.Node exampleNode = readSession.get_node ("/tests_general_base/idExample");
+
+	/* Read its name, node type and creation date */
 	stdout.printf ("Found node '%s' at '%s' path \n", exampleNode.get_name (), exampleNode.get_path ());
 	stdout.printf ("Node type '%s' created at '%s' \n", 
 		exampleNode.get_node_property ("jcr:primaryType").get_string (), 
